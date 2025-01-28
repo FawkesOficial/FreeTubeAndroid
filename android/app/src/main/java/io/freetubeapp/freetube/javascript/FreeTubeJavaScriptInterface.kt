@@ -26,6 +26,8 @@ import androidx.documentfile.provider.DocumentFile
 import io.freetubeapp.freetube.MainActivity
 import io.freetubeapp.freetube.MediaControlsReceiver
 import io.freetubeapp.freetube.R
+import io.freetubeapp.freetube.helpers.Promise
+import org.json.JSONObject
 import java.io.File
 import java.io.FileInputStream
 import java.net.URL
@@ -375,24 +377,25 @@ class FreeTubeJavaScriptInterface {
    */
   @JavascriptInterface
   fun readFile(basedir: String, filename: String): String {
-    val promise = jsCommunicator.jsPromise()
-    context.threadPoolExecutor.execute {
+    val promise = Promise(context.threadPoolExecutor, {
+      resolve,
+      reject ->
       try {
         if (basedir.startsWith("content://")) {
           val stream = context.contentResolver.openInputStream(Uri.parse(basedir))
           val content = String(stream!!.readBytes())
           stream!!.close()
-          jsCommunicator.resolve(promise, content)
+          resolve(content)
         } else {
           val path = getDirectory(basedir)
           val file = File(path, filename)
-          jsCommunicator.resolve(promise, FileInputStream(file).bufferedReader().use { it.readText() })
+          resolve(FileInputStream(file).bufferedReader().use { it.readText() })
         }
       } catch (ex: Exception) {
-        jsCommunicator.reject(promise, ex.stackTraceToString())
+        reject(ex.stackTraceToString())
       }
-    }
-    return promise
+    })
+    return promise.addJsCommunicator(jsCommunicator)
   }
 
   /**

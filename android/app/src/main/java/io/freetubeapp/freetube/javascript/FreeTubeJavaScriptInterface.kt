@@ -40,7 +40,7 @@ class FreeTubeJavaScriptInterface {
   private var lastState: Int
   private var lastNotification: Notification? = null
   private var keepScreenOn: Boolean = false
-  private val jsCommunicator: AsyncJSCommunication
+  private val jsCommunicator: AsyncJSCommunicator
   companion object {
     private const val DATA_DIRECTORY = "data://"
     private const val CHANNEL_ID = "media_controls"
@@ -53,7 +53,7 @@ class FreeTubeJavaScriptInterface {
     mediaSession = null
     lastPosition = 0
     lastState = PlaybackState.STATE_PLAYING
-    jsCommunicator = AsyncJSCommunication(main.webView)
+    jsCommunicator = AsyncJSCommunicator(main.webView)
   }
 
   @JavascriptInterface

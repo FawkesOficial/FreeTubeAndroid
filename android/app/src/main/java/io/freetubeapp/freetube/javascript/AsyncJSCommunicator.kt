@@ -3,7 +3,7 @@ package io.freetubeapp.freetube.javascript
 import android.webkit.WebView
 import java.util.UUID.randomUUID
 
-class AsyncJSCommunication(givenWebView: WebView) {
+class AsyncJSCommunicator(givenWebView: WebView) {
   private val webView = givenWebView
   private var syncMessages: MutableMap<String, String> = HashMap()
 

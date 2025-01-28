@@ -58,6 +58,7 @@
 <script setup>
 import { nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useId } from '../../composables/use-id-polyfill'
+import android from 'android'
 
 import store from '../../store/index'
 
@@ -113,6 +114,10 @@ const promptCard = ref(null)
 let promptButtons = []
 let lastActiveElement = null
 
+function exitPrompt() {
+  hide()
+}
+
 onMounted(() => {
   lastActiveElement = document.activeElement
   document.addEventListener('keydown', handleEscape, true)
@@ -121,11 +126,19 @@ onMounted(() => {
     promptButtons = Array.from(promptCard.value.$el.querySelectorAll('.btn.ripple, .iconButton'))
     focusItem(0)
   })
+  if (process.env.IS_ANDROID) {
+    android.enterPromptMode()
+    window.addEventListener('exit-prompt', exitPrompt)
+  }
 })
 
 onBeforeUnmount(() => {
   document.removeEventListener('keydown', handleEscape, true)
   nextTick(() => lastActiveElement?.focus())
+  if (process.env.IS_ANDROID) {
+    android.exitPromptMode()
+    window.removeEventListener('exit-prompt', exitPrompt)
+  }
 })
 
 /**

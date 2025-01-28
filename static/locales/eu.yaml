@@ -210,6 +210,8 @@ User Playlists:
       This playlist has a video with a duration error: Erreprodukzio-zerrenda honek
         iraupenik ez duen bideo bat du gutxienez. Hortaz, zero balitz bezala sailkatuko
         da.
+      Video has been removed. Click here to undo.: Bideoa kendu da. Egin klik hemen
+        desegiteko.
     Search for Videos: Bilatu bideoak
   AddVideoPrompt:
     Added {count} Times: Gehitu da | {count} aldiz gehitu da
@@ -409,9 +411,9 @@ Settings:
     Hide FreeTube Header Logo: Ezkutatu FreeTube goiburuko logotipoa
   Player Settings:
     Player Settings: 'Erreproduzitzailea'
-    Play Next Video: 'Hurrengo bideoa erreproduzitu'
+    Play Next Video: 'Gomendatutako bideoak automatikoki erreproduzitu'
     Turn on Subtitles by Default: 'Aktibatu Azpitituluak lehenespenez'
-    Autoplay Videos: 'Bideoen erreprodukzio automatikoa'
+    Autoplay Videos: 'Hasi bideoak erreproduzitzen automatikoki'
     Proxy Videos Through Invidious: 'Invidious bitarteko Proxy bideoak'
     Autoplay Playlists: 'Automatikoki erreproduzitu erreprodukzio-zerrendak'
     Enable Theatre Mode by Default: 'Gaitu antzerki modua lehenespenez'
@@ -459,9 +461,15 @@ Settings:
     Skip by Scrolling Over Video Player: Saltatu bideo-erreproduzitzailean korrituz
     Enter Fullscreen on Display Rotate: Sartu pantaila osoko pantaila biratu pantailan
     Autoplay Interruption Timer: Erreprodukzio automatikoa eteteko tenporizadorea
+    Default Viewing Mode:
+      Default Viewing Mode: Ikusteko modu lehenetsia
+      Full Screen: Pantaila osoa
+      Picture in Picture: Irudia Irudian
+      External Player: Kanpo erreproduzitzailea ({externalPlayerName})
+      Theater: Antzerkia
   Privacy Settings:
     Privacy Settings: 'Pribatutasuna'
-    Remember History: 'Historikoa oroitu'
+    Remember History: 'Ikusitakoaren historikoa oroitu'
     Save Watched Progress: 'Ikusitakoaren progresioa gorde'
     Clear Search Cache: 'Bilaketen cachea ezabatu'
     Are you sure you want to clear out your search cache?: 'Ziur al zaude bilaketa-cachea
@@ -481,6 +489,12 @@ Settings:
     Remove All Playlists: Kendu erreprodukzio-zerrenda guztiak
     Are you sure you want to remove all your playlists?: Ziur erreprodukzio-zerrenda
       guztiak kendu nahi dituzula?
+    Clear Search History and Cache: Garbitu bilaketen historikoa eta cache-a
+    Remember Search History: Bilatutakoaren historikoa oroitu
+    Are you sure you want to clear out your search history and cache?: Ziur al zaude
+      bilaketen historikoa eta cache-a garbitu nahi dituzula?
+    Search history and cache have been cleared: Bilaketen historikoa eta cache-a garbitu
+      berri dira
   Subscription Settings:
     Subscription Settings: 'Harpidetza'
     Hide Videos on Watch: 'Ikusten ari zaren bideoa ezkutatu'
@@ -899,7 +913,6 @@ Video:
   'Live Chat is unavailable for this stream. It may have been disabled by the uploader.': Zuzeneko
     txata ez dago erabilgarri zuzeneko honentzat. Baliteke igo duenak desgaitu izana.
   Show Super Chat Comment: Erakutsi Super txat iruzkina
-  Pause on Current Video: Gelditu uneko bideoa
   More Options: Aukera gehiago
   Upcoming: Datozenak
   Scroll to Bottom: Joan Beherantz
@@ -932,6 +945,8 @@ Video:
     Playback will resume automatically when your connection comes back: Erreprodukzioa
       automatikoki berrekingo da konexioa itzultzen denean.
     Full Window: Pantaila osoa
+    Autoplay is off: Autoerreprodukzioa desaktibatuta dago
+    Autoplay is on: Autoerreprodukzioa aktibatuta dago
   MembersOnly: Kideentzat baino ez diren bideoak ezin dira FreeTube-rekin ikusi, Googleren
     saioa hastea eta eduki sortzailearen kanalari ordaindutako bazkidetza eskatzen
     baitute.
@@ -1136,6 +1151,7 @@ Yes: 'Bai'
 No: 'Ez'
 Search Bar:
   Clear Input: Sarrera garbitu
+  Remove: Kendu
 Are you sure you want to open this link?: Ziur al zaude ataka hau ireki nahi duzula?
 Open New Window: Leiho berria ireki
 Default Invidious instance has been set to {instance}: 'Lehenetsitako Individious-eko
@@ -1165,10 +1181,6 @@ Close Banner: Itxi iragarkia
 Age Restricted:
   This channel is age restricted: Kanal hau adin mugatuta dago
   This video is age restricted: Bideo hau adin mugatuta dago
-Playlist will not pause when current video is finished: Erreprodukzio-zerrenda ez
-  da etengo uneko bideoa amaitzen denean
-Playlist will pause when current video is finished: Erreprodukzio-zerrenda pausatu
-  egingo da uneko bideoa amaitzen denean
 Channel Unhidden: '{channel} kanalaren iragazkitik kendu da'
 Clipboard:
   Cannot access clipboard without a secure connection: Ezin da arbelera sartu konexio
@@ -1289,3 +1301,4 @@ KeyboardShortcutPrompt:
   Close Window: Itxi leihoa
   Show Keyboard Shortcuts: Erakutsi teklatuko laster-bideak
   History Backward: Egin orrialde bat atzera
+shortcutLabelSeparator: ｜

@@ -1,5 +1,3 @@
-import fs from 'fs/promises'
-import path from 'path'
 
 import { computed, defineComponent, onBeforeUnmount, onMounted, reactive, ref, shallowRef, watch } from 'vue'
 import shaka from 'shaka-player'
@@ -13,6 +11,7 @@ import { LegacyQualitySelection } from './player-components/LegacyQualitySelecti
 import { ScreenshotButton } from './player-components/ScreenshotButton'
 import { StatsButton } from './player-components/StatsButton'
 import { TheatreModeButton } from './player-components/TheatreModeButton'
+import { AutoplayToggle } from './player-components/AutoplayToggle'
 import {
   findMostSimilarAudioBandwidth,
   getSponsorBlockSegments,
@@ -23,11 +22,9 @@ import {
 } from '../../helpers/player/utils'
 import {
   addKeyboardShortcutToActionTitle,
-  getPicturesPath,
   showToast,
   writeFileWithPicker
 } from '../../helpers/utils'
-import { pathExists } from '../../helpers/filesystem'
 import { STATE_PAUSED, STATE_PLAYING, updateMediaSessionState } from '../../helpers/android'
 import android from 'android'
 
@@ -36,7 +33,7 @@ import android from 'android'
 // The UTF-8 characters "h", "t", "t", and "p".
 const HTTP_IN_HEX = 0x68747470
 
-const USE_OVERFLOW_MENU_WIDTH_THRESHOLD = 600
+const USE_OVERFLOW_MENU_WIDTH_THRESHOLD = 634
 
 const RequestType = shaka.net.NetworkingEngine.RequestType
 const AdvancedRequestType = shaka.net.NetworkingEngine.AdvancedRequestType
@@ -123,9 +120,29 @@ export default defineComponent({
       type: Boolean,
       default: false
     },
+    autoplayPossible: {
+      type: Boolean,
+      default: false
+    },
+    autoplayEnabled: {
+      type: Boolean,
+      default: false
+    },
     vrProjection: {
       type: String,
       default: null
+    },
+    startInFullscreen: {
+      type: Boolean,
+      default: false
+    },
+    startInFullwindow: {
+      type: Boolean,
+      default: false
+    },
+    startInPip: {
+      type: Boolean,
+      default: false
     },
     currentPlaybackRate: {
       type: Number,
@@ -137,6 +154,7 @@ export default defineComponent({
     'loaded',
     'ended',
     'timeupdate',
+    'toggle-autoplay',
     'toggle-theatre-mode',
     'playback-rate-updated'
   ],
@@ -166,10 +184,14 @@ export default defineComponent({
     const isLive = ref(false)
 
     const useOverFlowMenu = ref(false)
-    const fullWindowEnabled = ref(false)
     const forceAspectRatio = ref(false)
 
     const activeLegacyFormat = shallowRef(null)
+
+    const fullWindowEnabled = ref(false)
+    const startInFullwindow = props.startInFullwindow
+    let startInFullscreen = props.startInFullscreen
+    let startInPip = props.startInPip
 
     /**
      * @type {{
@@ -339,11 +361,6 @@ export default defineComponent({
     /** @type {import('vue').ComputedRef<boolean>} */
     const screenshotAskPath = computed(() => {
       return store.getters.getScreenshotAskPath
-    })
-
-    /** @type {import('vue').ComputedRef<string>} */
-    const screenshotFolder = computed(() => {
-      return store.getters.getScreenshotFolderPath
     })
 
     /** @type {import('vue').ComputedRef<boolean>} */
@@ -774,6 +791,7 @@ export default defineComponent({
       if (useOverFlowMenu.value) {
         uiConfig.overflowMenuButtons = [
           'ft_screenshot',
+          'ft_autoplay_toggle',
           'playback_rate',
           'loop',
           'ft_audio_tracks',
@@ -793,6 +811,7 @@ export default defineComponent({
           'recenter_vr',
           'toggle_stereoscopic',
           'ft_screenshot',
+          'ft_autoplay_toggle',
           'playback_rate',
           'loop',
           'ft_audio_tracks',
@@ -819,6 +838,11 @@ export default defineComponent({
         if (index !== -1) {
           elementList.splice(index, 1)
         }
+      }
+
+      if (!props.autoplayPossible) {
+        const index = elementList.indexOf('ft_autoplay_toggle')
+        elementList.splice(index, 1)
       }
 
       if (props.format === 'audio') {
@@ -998,6 +1022,14 @@ export default defineComponent({
       }
     })
 
+    watch(() => props.autoplayEnabled, (newValue, oldValue) => {
+      if (newValue !== oldValue) {
+        events.dispatchEvent(new CustomEvent('setAutoplay', {
+          detail: newValue
+        }))
+      }
+    })
+
     /** @type {ResizeObserver|null} */
     let resizeObserver = null
 
@@ -1113,6 +1145,15 @@ export default defineComponent({
       }
 
       emit('ended')
+    }
+
+    function handleCanPlay() {
+      // PiP can only be activated once the video's readState and video track are populated
+      if (startInPip && props.format !== 'audio' && ui.getControls().isPiPAllowed() && process.env.IS_ELECTRON) {
+        startInPip = false
+        const { ipcRenderer } = require('electron')
+        ipcRenderer.send(IpcChannels.REQUEST_PIP)
+      }
     }
 
     function updateVolume() {
@@ -1575,16 +1616,16 @@ export default defineComponent({
 
       const filenameWithExtension = `${filename}.${format}`
 
-      if (!process.env.IS_ELECTRON || screenshotAskPath.value) {
-        const wasPlaying = !video_.paused
-        if (wasPlaying) {
-          video_.pause()
-        }
+      const wasPlaying = !video_.paused
+      if (wasPlaying) {
+        video_.pause()
+      }
 
-        try {
-          /** @type {Blob} */
-          const blob = await new Promise((resolve) => canvas.toBlob(resolve, mimeType, imageQuality))
+      try {
+        /** @type {Blob} */
+        const blob = await new Promise((resolve) => canvas.toBlob(resolve, mimeType, imageQuality))
 
+        if (!process.env.IS_ELECTRON || screenshotAskPath.value) {
           const saved = await writeFileWithPicker(
             filenameWithExtension,
             blob,
@@ -1598,53 +1639,24 @@ export default defineComponent({
           if (saved) {
             showToast(t('Screenshot Success'))
           }
-        } catch (error) {
-          console.error(error)
-          showToast(t('Screenshot Error', { error }))
-        }
+        } else {
+          const arrayBuffer = await blob.arrayBuffer()
 
+          const { ipcRenderer } = require('electron')
+
+          await ipcRenderer.invoke(IpcChannels.WRITE_SCREENSHOT, filenameWithExtension, arrayBuffer)
+
+          showToast(t('Screenshot Success'))
+        }
+      } catch (error) {
+        console.error(error)
+        showToast(t('Screenshot Error', { error }))
+      } finally {
         canvas.remove()
 
         if (wasPlaying) {
           video_.play()
         }
-      } else {
-        let dirPath
-
-        if (screenshotFolder.value === '') {
-          dirPath = path.join(await getPicturesPath(), 'Freetube')
-        } else {
-          dirPath = screenshotFolder.value
-        }
-
-        if (!(await pathExists(dirPath))) {
-          try {
-            await fs.mkdir(dirPath, { recursive: true })
-          } catch (err) {
-            console.error(err)
-            showToast(t('Screenshot Error', { error: err }))
-            canvas.remove()
-            return
-          }
-        }
-
-        const filePath = path.join(dirPath, filenameWithExtension)
-
-        canvas.toBlob((result) => {
-          result.arrayBuffer().then(ab => {
-            const arr = new Uint8Array(ab)
-
-            fs.writeFile(filePath, arr)
-              .then(() => {
-                showToast(t('Screenshot Success'))
-              })
-              .catch((err) => {
-                console.error(err)
-                showToast(t('Screenshot Error', { error: err }))
-              })
-          })
-        }, mimeType, imageQuality)
-        canvas.remove()
       }
     }
 
@@ -1664,6 +1676,24 @@ export default defineComponent({
 
       shakaControls.registerElement('ft_audio_tracks', new AudioTrackSelectionFactory())
       shakaOverflowMenu.registerElement('ft_audio_tracks', new AudioTrackSelectionFactory())
+    }
+
+    function registerAutoplayToggle() {
+      events.addEventListener('toggleAutoplay', () => {
+        emit('toggle-autoplay')
+      })
+
+      /**
+       * @implements {shaka.extern.IUIElement.Factory}
+       */
+      class AutoplayToggleFactory {
+        create(rootElement, controls) {
+          return new AutoplayToggle(props.autoplayEnabled, events, rootElement, controls)
+        }
+      }
+
+      shakaControls.registerElement('ft_autoplay_toggle', new AutoplayToggleFactory())
+      shakaOverflowMenu.registerElement('ft_autoplay_toggle', new AutoplayToggleFactory())
     }
 
     function registerTheatreModeButton() {
@@ -1698,6 +1728,12 @@ export default defineComponent({
           document.body.classList.remove('playerFullWindow')
         }
       })
+
+      if (startInFullwindow) {
+        events.dispatchEvent(new CustomEvent('setFullWindow', {
+          detail: true
+        }))
+      }
 
       /**
        * @implements {shaka.extern.IUIElement.Factory}
@@ -1789,11 +1825,14 @@ export default defineComponent({
     /**
      * As shaka-player doesn't let you unregister custom control factories,
      * overwrite them with `null` instead so the referenced objects
-     * (e.g. {@linkcode events}, {@linkcode fullWindowEnabled}) can get gargabe collected
+     * (e.g. {@linkcode events}, {@linkcode fullWindowEnabled}) can get garbage collected
      */
     function cleanUpCustomPlayerControls() {
       shakaControls.registerElement('ft_audio_tracks', null)
       shakaOverflowMenu.registerElement('ft_audio_tracks', null)
+
+      shakaControls.registerElement('ft_autoplay_toggle', null)
+      shakaOverflowMenu.registerElement('ft_autoplay_toggle', null)
 
       shakaControls.registerElement('ft_theatre_mode', null)
       shakaOverflowMenu.registerElement('ft_theatre_mode', null)
@@ -2439,6 +2478,8 @@ export default defineComponent({
 
       registerScreenshotButton()
       registerAudioTrackSelection()
+      registerAutoplayToggle()
+
       registerTheatreModeButton()
       registerFullWindowButton()
       registerLegacyQualitySelection()
@@ -2629,6 +2670,12 @@ export default defineComponent({
 
       if (props.chapters.length > 0) {
         createChapterMarkers()
+      }
+
+      if (startInFullscreen && process.env.IS_ELECTRON) {
+        startInFullscreen = false
+        const { ipcRenderer } = require('electron')
+        ipcRenderer.send(IpcChannels.REQUEST_FULLSCREEN)
       }
     }
 
@@ -2844,11 +2891,25 @@ export default defineComponent({
      * Vue's lifecycle hooks are synchonous, so if we destroy the player in {@linkcode onBeforeUnmount},
      * it won't be finished in time, as the player destruction is asynchronous.
      * To workaround that we destroy the player first and wait for it to finish before we unmount this component.
+     *
+     * @returns {Promise<{ startNextVideoInFullscreen: boolean, startNextVideoInFullwindow: boolean, startNextVideoInPip: boolean }>}
      */
     async function destroyPlayer() {
       ignoreErrors = true
 
+      let uiState = { startNextVideoInFullscreen: false, startNextVideoInFullwindow: false, startNextVideoInPip: false }
+
       if (ui) {
+        if (ui.getControls()) {
+          // save the state of player settings to reinitialize them upon next creation
+          const controls = ui.getControls()
+          uiState = {
+            startNextVideoInFullscreen: controls.isFullScreenEnabled(),
+            startNextVideoInFullwindow: fullWindowEnabled.value,
+            startNextVideoInPip: controls.isPiPEnabled()
+          }
+        }
+
         // destroying the ui also destroys the player
         await ui.destroy()
         ui = null
@@ -2867,6 +2928,8 @@ export default defineComponent({
       if (video.value) {
         video.value.ui = null
       }
+
+      return uiState
     }
 
     expose({
@@ -2920,6 +2983,7 @@ export default defineComponent({
 
       handlePlay,
       handlePause,
+      handleCanPlay,
       handleEnded,
       updateVolume,
       handleTimeupdate,

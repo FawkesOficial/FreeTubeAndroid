@@ -33,7 +33,12 @@
           :title="videoTitle"
           :theatre-possible="theatrePossible"
           :use-theatre-mode="useTheatreMode"
+          :autoplay-possible="autoplayPossible"
+          :autoplay-enabled="autoplayEnabled"
           :vr-projection="vrProjection"
+          :start-in-fullscreen="startNextVideoInFullscreen"
+          :start-in-fullwindow="startNextVideoInFullwindow"
+          :start-in-pip="startNextVideoInPip"
           :current-playback-rate="currentPlaybackRate"
           class="videoPlayer"
           @error="handlePlayerError"
@@ -41,6 +46,7 @@
           @timeupdate="updateCurrentChapter"
           @ended="handleVideoEnded"
           @toggle-theatre-mode="useTheatreMode = !useTheatreMode"
+          @toggle-autoplay="toggleAutoplay"
           @playback-rate-updated="updatePlaybackRate"
         />
         <div
@@ -204,7 +210,6 @@
       />
       <watch-video-recommendations
         v-if="!isLoading && !hideRecommendedVideos"
-        :show-autoplay="!watchingPlaylist"
         :data="recommendedVideos"
         class="watchVideoSideBar watchVideoRecommendations"
         :class="{

@@ -65,14 +65,17 @@ export default defineComponent({
     document.removeEventListener('click', this.resetAutoplayInterruptionTimeout)
 
     if (this.$refs.player) {
-      await this.$refs.player.destroyPlayer()
+      await this.destroyPlayer()
     }
 
     next()
   },
   data: function () {
     return {
+      startNextVideoInFullscreen: false,
       previousHistoryOffset: 1,
+      startNextVideoInFullwindow: false,
+      startNextVideoInPip: false,
       isLoading: true,
       firstLoad: true,
       useTheatreMode: false,
@@ -116,6 +119,8 @@ export default defineComponent({
       captions: [],
       /** @type {'EQUIRECTANGULAR' | 'EQUIRECTANGULAR_THREED_TOP_BOTTOM' | 'MESH'| null} */
       vrProjection: null,
+      autoplayNextRecommendedVideo: false,
+      autoplayNextPlaylistVideo: false,
       recommendedVideos: [],
       downloadLinks: [],
       watchingPlaylist: false,
@@ -177,19 +182,22 @@ export default defineComponent({
     defaultInterval: function () {
       return this.$store.getters.getDefaultInterval
     },
-    defaultTheatreMode: function () {
-      return this.$store.getters.getDefaultTheatreMode
+    defaultViewingMode: function () {
+      return this.$store.getters.getDefaultViewingMode
     },
     defaultVideoFormat: function () {
       return this.$store.getters.getDefaultVideoFormat
     },
+    autoplayEnabled: function () {
+      return this.watchingPlaylist ? this.autoplayNextPlaylistVideo : this.autoplayNextRecommendedVideo
+    },
     thumbnailPreference: function () {
       return this.$store.getters.getThumbnailPreference
     },
-    playNextVideo: function () {
+    autoplayNextRecommendedVideoByDefault: function () {
       return this.$store.getters.getPlayNextVideo
     },
-    autoplayPlaylists: function () {
+    autoplayNextPlaylistVideoByDefault: function () {
       return this.$store.getters.getAutoplayPlaylists
     },
     hideRecommendedVideos: function () {
@@ -215,6 +223,10 @@ export default defineComponent({
     },
     theatrePossible: function () {
       return !this.hideRecommendedVideos || (!this.hideLiveChat && this.isLive) || this.watchingPlaylist
+    },
+    autoplayPossible: function () {
+      return (!this.watchingPlaylist && !this.hideRecommendedVideos && !!this.nextRecommendedVideo) ||
+      (this.watchingPlaylist && !this.$refs.watchVideoPlaylist?.shouldStopDueToPlaylistEnd)
     },
     currentLocale: function () {
       return this.$i18n.locale
@@ -246,6 +258,11 @@ export default defineComponent({
 
       return this.$store.getters.getPlaylist(this.playlistId)
     },
+    nextRecommendedVideo: function () {
+      return this.recommendedVideos.find((video) =>
+        !this.isHiddenVideo(this.forbiddenTitles, this.channelsHidden, video)
+      )
+    },
     startTimeSeconds: function () {
       if (this.isLoading || this.isLive) {
         return null
@@ -272,7 +289,7 @@ export default defineComponent({
       this.handleRouteChange()
 
       if (this.$refs.player) {
-        await this.$refs.player.destroyPlayer()
+        await this.destroyPlayer()
       }
 
       // react to route changes...
@@ -314,6 +331,9 @@ export default defineComponent({
   created: function () {
     this.videoId = this.$route.params.id
     this.activeFormat = this.defaultVideoFormat
+    // So that the value for this session remains unchanged even if setting changed
+    this.autoplayNextRecommendedVideo = this.autoplayNextRecommendedVideoByDefault
+    this.autoplayNextPlaylistVideo = this.autoplayNextPlaylistVideoByDefault
 
     this.checkIfTimestamp()
     this.currentPlaybackRate = this.$store.getters.getDefaultPlayback
@@ -384,7 +404,7 @@ export default defineComponent({
       this.checkIfPlaylist()
 
       // this has to be below checkIfPlaylist() as theatrePossible needs to know if there is a playlist or not
-      this.useTheatreMode = this.defaultTheatreMode && this.theatrePossible
+      this.setViewingModeOnFirstLoad()
 
       if (!process.env.SUPPORTS_LOCAL_API || this.backendPreference === 'invidious') {
         this.getVideoInformationInvidious()
@@ -399,6 +419,22 @@ export default defineComponent({
 
       window.addEventListener('beforeunload', this.handleWatchProgress)
       this.resetAutoplayInterruptionTimeout()
+    },
+
+    setViewingModeOnFirstLoad: function () {
+      switch (this.defaultViewingMode) {
+        case 'theatre':
+          this.useTheatreMode = this.theatrePossible
+          break
+        case 'fullscreen':
+          this.startNextVideoInFullscreen = true
+          break
+        case 'fullwindow':
+          this.startNextVideoInFullwindow = true
+          break
+        case 'pip':
+          this.startNextVideoInPip = true
+      }
     },
 
     changeTimestamp: function (timestamp) {
@@ -1194,10 +1230,6 @@ export default defineComponent({
     },
 
     checkIfPlaylist: function () {
-      // On the off chance that user selected pause on current video
-      // Then clicks on another video in the playlist
-      this.disablePlaylistPauseOnCurrent()
-
       if (this.$route.query == null) {
         this.watchingPlaylist = false
         return
@@ -1305,7 +1337,7 @@ export default defineComponent({
     },
 
     handleVideoEnded: function () {
-      if ((!this.watchingPlaylist || !this.autoplayPlaylists) && !this.playNextVideo) {
+      if (!this.autoplayEnabled) {
         return
       }
 
@@ -1321,11 +1353,6 @@ export default defineComponent({
         return
       }
 
-      if (this.watchingPlaylist && this.getPlaylistPauseOnCurrent()) {
-        this.disablePlaylistPauseOnCurrent()
-        return
-      }
-
       if (this.watchingPlaylist && this.$refs.watchVideoPlaylist?.shouldStopDueToPlaylistEnd) {
         // Let `watchVideoPlaylist` handle end of playlist, no countdown needed
         this.$refs.watchVideoPlaylist.playNextVideo()
@@ -1334,11 +1361,7 @@ export default defineComponent({
 
       let nextVideoId = null
       if (!this.watchingPlaylist) {
-        const forbiddenTitles = this.forbiddenTitles
-        const channelsHidden = this.channelsHidden
-        nextVideoId = this.recommendedVideos.find((video) =>
-          !this.isHiddenVideo(forbiddenTitles, channelsHidden, video)
-        )?.videoId
+        nextVideoId = this.nextRecommendedVideo?.videoId
         if (!nextVideoId) {
           return
         }
@@ -1348,7 +1371,7 @@ export default defineComponent({
       this.playNextTimeout = setTimeout(() => {
         const player = this.$refs.player
 
-        if (player && player.isPaused()) {
+        if (player?.isPaused()) {
           if (this.watchingPlaylist) {
             this.$refs.watchVideoPlaylist.playNextVideo()
           } else {
@@ -1359,6 +1382,7 @@ export default defineComponent({
             showToast(this.$t('Playing Next Video'))
           }
         }
+        this.playNextTimeout = null
       }, nextVideoInterval * 1000)
 
       let countDownTimeLeftInSecond = nextVideoInterval
@@ -1373,11 +1397,7 @@ export default defineComponent({
         // To avoid message flashing
         // `time` is manually tested to be 700
         const message = this.$tc('Playing Next Video Interval', countDownTimeLeftInSecond, { nextVideoInterval: countDownTimeLeftInSecond })
-        showToast(message, 700, () => {
-          clearTimeout(this.playNextTimeout)
-          clearInterval(this.playNextCountDownIntervalId)
-          showToast(this.$t('Canceled next video autoplay'))
-        })
+        showToast(message, 700, this.abortAutoplayCountdown)
 
         // At least this var should be updated AFTER showing the message
         countDownTimeLeftInSecond = countDownTimeLeftInSecond - 1
@@ -1387,9 +1407,18 @@ export default defineComponent({
       this.playNextCountDownIntervalId = setInterval(showCountDownMessage, 1000)
     },
 
-    handleRouteChange: function () {
+    abortAutoplayCountdown: function (hideToast = false) {
       clearTimeout(this.playNextTimeout)
       clearInterval(this.playNextCountDownIntervalId)
+      this.playNextTimeout = null
+
+      if (!hideToast) {
+        showToast(this.$t('Canceled next video autoplay'))
+      }
+    },
+
+    handleRouteChange: function () {
+      this.abortAutoplayCountdown(true)
       this.videoChapters = []
       this.videoChaptersKind = 'chapters'
 
@@ -1701,16 +1730,6 @@ export default defineComponent({
       return this.$refs.watchVideoPlaylist ? this.$refs.watchVideoPlaylist.loopEnabled : false
     },
 
-    getPlaylistPauseOnCurrent: function () {
-      return this.$refs.watchVideoPlaylist ? this.$refs.watchVideoPlaylist.pauseOnCurrentVideo : false
-    },
-
-    disablePlaylistPauseOnCurrent: function () {
-      if (this.$refs.watchVideoPlaylist) {
-        this.$refs.watchVideoPlaylist.pauseOnCurrentVideo = false
-      }
-    },
-
     updateTitle: function () {
       this.setAppTitle(`${this.videoTitle} - ${packageDetails.productName}`)
     },
@@ -1719,6 +1738,18 @@ export default defineComponent({
       return channelsHidden.some(ch => ch.name === video.authorId) ||
         channelsHidden.some(ch => ch.name === video.author) ||
         forbiddenTitles.some((text) => video.title?.toLowerCase().includes(text.toLowerCase()))
+    },
+
+    toggleAutoplay: function() {
+      if (this.autoplayEnabled && this.playNextTimeout) {
+        this.abortAutoplayCountdown()
+      }
+
+      if (this.watchingPlaylist) {
+        this.autoplayNextPlaylistVideo = !this.autoplayEnabled
+      } else {
+        this.autoplayNextRecommendedVideo = !this.autoplayEnabled
+      }
     },
 
     updateLocalPlaylistLastPlayedAtSometimes() {
@@ -1736,6 +1767,13 @@ export default defineComponent({
 
     updatePlaybackRate(newRate) {
       this.currentPlaybackRate = newRate
+    },
+
+    destroyPlayer: async function() {
+      const uiState = await this.$refs.player.destroyPlayer()
+      this.startNextVideoInFullscreen = uiState.startNextVideoInFullscreen
+      this.startNextVideoInFullwindow = uiState.startNextVideoInFullwindow
+      this.startNextVideoInPip = uiState.startNextVideoInPip
     },
 
     ...mapActions([

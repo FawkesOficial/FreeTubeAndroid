@@ -11,6 +11,7 @@ import {
   DBActions,
   SyncEvents,
   ABOUT_BITCOIN_ADDRESS,
+  KeyboardShortcuts,
 } from '../constants'
 import * as baseHandlers from '../datastores/handlers/base'
 import { extractExpiryTimestamp, ImageCache } from './ImageCache'
@@ -631,6 +632,8 @@ function runApp() {
     }
   }
 
+  const ROOT_APP_URL = process.env.NODE_ENV === 'development' ? 'http://localhost:9080' : 'app://bundle/index.html'
+
   async function createWindow(
     {
       replaceMainWindow = true,
@@ -774,18 +777,10 @@ function runApp() {
     }
 
     // load root file/url
-    if (process.env.NODE_ENV === 'development') {
-      let devStartupURL = 'http://localhost:9080'
-      if (windowStartupUrl != null) {
-        devStartupURL = windowStartupUrl
-      }
-      newWindow.loadURL(devStartupURL)
+    if (windowStartupUrl != null) {
+      newWindow.loadURL(windowStartupUrl)
     } else {
-      if (windowStartupUrl != null) {
-        newWindow.loadURL(windowStartupUrl)
-      } else {
-        newWindow.loadURL('app://bundle/index.html')
-      }
+      newWindow.loadURL(ROOT_APP_URL)
     }
 
     if (typeof searchQueryText === 'string' && searchQueryText.length > 0) {
@@ -981,6 +976,18 @@ function runApp() {
     return app.getPath('pictures')
   })
 
+  // Allows programmatic toggling of fullscreen without accompanying user interaction.
+  // See: https://developer.mozilla.org/en-US/docs/Web/Security/User_activation#transient_activation
+  ipcMain.on(IpcChannels.REQUEST_FULLSCREEN, ({ sender }) => {
+    sender.executeJavaScript('document.querySelector("video.player").ui.getControls().toggleFullScreen()', true)
+  })
+
+  // Allows programmatic toggling of picture-in-picture mode without accompanying user interaction.
+  // See: https://developer.mozilla.org/en-US/docs/Web/Security/User_activation#transient_activation
+  ipcMain.on(IpcChannels.REQUEST_PIP, ({ sender }) => {
+    sender.executeJavaScript('document.querySelector("video.player").ui.getControls().togglePiP()', true)
+  })
+
   ipcMain.handle(IpcChannels.SHOW_OPEN_DIALOG, async ({ sender }, options) => {
     const senderWindow = findSenderWindow(sender)
     if (senderWindow) {
@@ -1003,6 +1010,40 @@ function runApp() {
     })
   }
 
+  ipcMain.handle(IpcChannels.WRITE_SCREENSHOT, async (event, filename, arrayBuffer) => {
+    if (!isFreeTubeUrl(event.senderFrame.url) || typeof filename !== 'string' || !(arrayBuffer instanceof ArrayBuffer)) {
+      return
+    }
+
+    const screenshotFolderPath = await baseHandlers.settings._findScreenshotFolderPath()
+
+    let directory
+    if (screenshotFolderPath && screenshotFolderPath.value.length > 0) {
+      directory = screenshotFolderPath.value
+    } else {
+      directory = path.join(app.getPath('pictures'), 'FreeTube')
+    }
+
+    directory = path.normalize(directory)
+
+    const filePath = path.resolve(directory, filename)
+
+    // Ensure that we are only writing inside of the expected directory
+    if (path.dirname(filePath) !== directory) {
+      throw new Error('Invalid save location')
+    }
+
+    try {
+      await asyncFs.mkdir(directory, { recursive: true })
+
+      await asyncFs.writeFile(filePath, new DataView(arrayBuffer))
+    } catch (error) {
+      console.error('WRITE_SCREENSHOT failed', error)
+      // throw a new error so that we don't expose the real error to the renderer
+      throw new Error('Failed to save')
+    }
+  })
+
   ipcMain.on(IpcChannels.STOP_POWER_SAVE_BLOCKER, (_, id) => {
     powerSaveBlocker.stop(id)
   })
@@ -1011,12 +1052,39 @@ function runApp() {
     return powerSaveBlocker.start('prevent-display-sleep')
   })
 
-  ipcMain.on(IpcChannels.CREATE_NEW_WINDOW, (_e, { windowStartupUrl = null, searchQueryText = null } = { }) => {
+  ipcMain.on(IpcChannels.CREATE_NEW_WINDOW, (event, path, query, searchQueryText) => {
+    if (!isFreeTubeUrl(event.senderFrame.url)) {
+      return
+    }
+
+    if (path == null && query == null && searchQueryText == null) {
+      createWindow({ replaceMainWindow: false, showWindowNow: true })
+      return
+    }
+
+    if (
+      typeof path !== 'string' ||
+      (query != null && typeof query !== 'object') ||
+      (searchQueryText != null && typeof searchQueryText !== 'string')
+    ) {
+      return
+    }
+
+    if (path.charAt(0) !== '/') {
+      path = `/${path}`
+    }
+
+    let windowStartupUrl = `${ROOT_APP_URL}#${path}`
+
+    if (query) {
+      windowStartupUrl += '?' + new URLSearchParams(query).toString()
+    }
+
     createWindow({
       replaceMainWindow: false,
       showWindowNow: true,
-      windowStartupUrl: windowStartupUrl,
-      searchQueryText: searchQueryText
+      windowStartupUrl,
+      searchQueryText
     })
   })
 
@@ -1058,7 +1126,12 @@ function runApp() {
 
       return contents.buffer
     } catch (e) {
-      console.error(e)
+      // Don't log the error if the file doesn't exist as we'll just fetch it from YouTube
+      // this usually happens when YouTube updates their player JavaScript
+      if (e.code !== 'ENOENT') {
+        console.error(e)
+      }
+
       return undefined
     }
   })
@@ -1332,9 +1405,12 @@ function runApp() {
           return null
 
         case DBActions.PLAYLISTS.DELETE_VIDEO_IDS:
-          await baseHandlers.playlists.deleteVideoIdsByPlaylistId(data._id, data.videoIds)
-          // TODO: Syncing (implement only when it starts being used)
-          // syncOtherWindows(IpcChannels.SYNC_PLAYLISTS, event, { event: '_', data })
+          await baseHandlers.playlists.deleteVideoIdsByPlaylistId(data._id, data.playlistItemIds)
+          syncOtherWindows(
+            IpcChannels.SYNC_PLAYLISTS,
+            event,
+            { event: SyncEvents.PLAYLISTS.DELETE_VIDEOS, data }
+          )
           return null
 
         case DBActions.PLAYLISTS.DELETE_ALL_VIDEOS:
@@ -1765,6 +1841,20 @@ function runApp() {
             },
             type: 'normal',
           },
+          ...(process.platform === 'darwin'
+            ? [
+                {
+                  label: 'Back',
+                  accelerator: KeyboardShortcuts.APP.GENERAL.HISTORY_BACKWARD_ALT_MAC,
+                  click: (_menuItem, browserWindow, _event) => {
+                    if (browserWindow == null) { return }
+
+                    browserWindow.webContents.navigationHistory.goBack()
+                  },
+                  visible: false,
+                },
+              ]
+            : []),
           {
             label: 'Forward',
             accelerator: 'Alt+Right',
@@ -1775,6 +1865,20 @@ function runApp() {
             },
             type: 'normal',
           },
+          ...(process.platform === 'darwin'
+            ? [
+                {
+                  label: 'Forward',
+                  accelerator: KeyboardShortcuts.APP.GENERAL.HISTORY_FORWARD_ALT_MAC,
+                  click: (_menuItem, browserWindow, _event) => {
+                    if (browserWindow == null) { return }
+
+                    browserWindow.webContents.navigationHistory.goForward()
+                  },
+                  visible: false,
+                },
+              ]
+            : []),
         ]
       },
       {

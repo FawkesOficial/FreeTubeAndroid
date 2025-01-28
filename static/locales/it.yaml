@@ -9,7 +9,7 @@ Locale Name: 'Italiano'
 File: 'File'
 Quit: 'Esci'
 Edit: 'Modifica'
-Undo: 'Annulla'
+Undo: 'Rifai'
 Redo: 'Ripeti'
 Cut: 'Taglia'
 Copy: 'Copia'
@@ -184,6 +184,8 @@ User Playlists:
       This playlist has a video with a duration error: Questa playlist contiene almeno
         un video che non ha durata; verranno ordinati come se la loro durata fosse
         zero.
+      Video has been removed. Click here to undo.: Il video è stato rimosso. Clicca
+        qui per annullare.
     Search for Videos: Ricerca nei video
   Are you sure you want to delete this playlist? This cannot be undone: Sei sicuro
     di voler eliminare questa playlist? Questa operazione non può essere annullata.
@@ -399,11 +401,11 @@ Settings:
     Hide FreeTube Header Logo: Nascondi il logo dell'intestazione di FreeTube
   Player Settings:
     Player Settings: 'Lettore'
-    Play Next Video: 'Riproduci il prossimo video'
+    Play Next Video: 'Riproduzione automatica dei video consigliati'
     Turn on Subtitles by Default: 'Abilita i sottotitoli per impostazione predefinita'
-    Autoplay Videos: 'Riproduci i video automaticamente'
+    Autoplay Videos: 'Avvia video automaticamente'
     Proxy Videos Through Invidious: 'Proxy dei video tramite Invidious'
-    Autoplay Playlists: 'Riproduci le playlist automaticamente'
+    Autoplay Playlists: 'Riproduzione automatica dei video della playlist'
     Enable Theatre Mode by Default: 'Abilita la modalità teatro come predefinita'
     Default Volume: 'Volume predefinito'
     Default Playback Rate: 'Velocità di riproduzione predefinita'
@@ -451,6 +453,12 @@ Settings:
     Enter Fullscreen on Display Rotate: Entra a schermo intero su Ruota schermo
     Skip by Scrolling Over Video Player: Salta tramite scorrimento sul lettore video
     Autoplay Interruption Timer: Timer di interruzione della riproduzione automatica
+    Default Viewing Mode:
+      Full Screen: Schermo intero
+      Picture in Picture: Immagine nell'immagine
+      External Player: Lettore esterno ({externalPlayerName})
+      Default Viewing Mode: Modalità di visualizzazione predefinita
+      Theater: Teatro
   Privacy Settings:
     Privacy Settings: 'Privacy'
     Remember History: 'Ricorda la Cronologia delle visualizzazioni'
@@ -858,7 +866,6 @@ Video:
   'Live Chat is unavailable for this stream. It may have been disabled by the uploader.': La
     chat dal vivo non è disponibile per questo video. Potrebbe essere stata disattivata
     dall'autore del caricamento.
-  Pause on Current Video: Pausa sul video attuale
   Unhide Channel: Mostra canale
   Hide Channel: Nascondi canale
   More Options: Più opzioni
@@ -891,6 +898,8 @@ Video:
     Playback will resume automatically when your connection comes back: La riproduzione
       riprenderà automaticamente quando verrà ripristinata la connessione.
     Skipped segment: Segmento {segmentCategory} saltato
+    Autoplay is off: La riproduzione automatica è disattivata
+    Autoplay is on: La riproduzione automatica è attiva
   IP block: YouTube ha bloccato il tuo indirizzo IP impedendogli di guardare i video.
     Prova a passare a una VPN o a un proxy diverso.
   Unlisted: Non elencato
@@ -1186,10 +1195,6 @@ Hashtag:
   This hashtag does not currently have any videos: Questo hashtag attualmente non
     ha alcun video
   Hashtag: Hashtag
-Playlist will pause when current video is finished: La playlist verrà messa in pausa
-  al termine del video attuale
-Playlist will not pause when current video is finished: La playlist non verrà messa
-  in pausa al termine del video attuale
 Channel Hidden: '{channel} aggiunto al filtro canali'
 Go to page: Vai a {page}
 Channel Unhidden: '{channel} rimosso dal filtro canali'
@@ -1297,3 +1302,4 @@ KeyboardShortcutPrompt:
   Next Frame: Fotogramma successivo (mentre è in pausa)
   Volume Up: Aumenta il volume
   Volume Down: Diminuisci il volume
+shortcutLabelSeparator: ｜

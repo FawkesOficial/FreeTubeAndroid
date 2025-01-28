@@ -201,6 +201,8 @@ User Playlists:
       This playlist has a video with a duration error: Selles esitusloendis on vähemalt
         üks video, millel puudub kestus. Järjestamisel me sel puhul arvestame kestuseks
         nulli.
+      Video has been removed. Click here to undo.: Video on eemaldatud. Tagasipööramiseks
+        klõpsi siin.
     Search for Videos: Otsi videoid
   Are you sure you want to delete this playlist? This cannot be undone: Kas sa oled
     kindel, et soovid selle esitusloendi kustutada? Seda tegevust ei saa tagasi pöörata.
@@ -400,11 +402,11 @@ Settings:
     Hide FreeTube Header Logo: Peida FreeTube'i päise logo
   Player Settings:
     Player Settings: 'Meediamängija'
-    Play Next Video: 'Esita ka järgmist videot'
+    Play Next Video: 'Esita soovitatud videoid automaatselt'
     Turn on Subtitles by Default: 'Vaikimisi näita subtiitreid'
-    Autoplay Videos: 'Esita videod automaatselt'
+    Autoplay Videos: 'Alusta videote esitust automaatselt'
     Proxy Videos Through Invidious: 'Puhverda videosid Invidious''e veebiteenuse kaudu'
-    Autoplay Playlists: 'Mängi esitusloendit automaatselt'
+    Autoplay Playlists: 'Mängi esitusloendi videoid automaatselt'
     Enable Theatre Mode by Default: 'Vaikimisi kasuta teatrivaadet (laia vaadet)'
     Default Volume: 'Vaikimisi helivaljus'
     Default Playback Rate: 'Vaikimisi videoesituse kiirus'
@@ -450,6 +452,12 @@ Settings:
     Skip by Scrolling Over Video Player: Jäta vahele, kerides üle videopleieri
     Enter Fullscreen on Display Rotate: Ekraani pööramisel ava täisekraanivaade
     Autoplay Interruption Timer: Viivituse taimer järgmise video esitamise katkestamisel
+    Default Viewing Mode:
+      Full Screen: Täisekraanivaade
+      External Player: Väline meediamängija ({externalPlayerName})
+      Theater: Teatrivaade
+      Default Viewing Mode: Vaikimisi vaade
+      Picture in Picture: Pilt pildis vaade
   Privacy Settings:
     Privacy Settings: 'Privaatsus'
     Remember History: 'Jäta vaatamiste ajalugu meelde'
@@ -892,7 +900,6 @@ Video:
   Upcoming: Tulemas
   'Live Chat is unavailable for this stream. It may have been disabled by the uploader.': Otsevestlus
     pole selle videovoo puhul saadaval. Võib-olla on üleslaadija vestluse keelanud.
-  Pause on Current Video: Peata hetkel esitatav video
   Unhide Channel: Näita kanalit
   Hide Channel: Peida kanal
   More Options: Veel valikuid
@@ -925,6 +932,8 @@ Video:
     Playback will resume automatically when your connection comes back: Taasesitus
       jätkub automaatselt niipea, kui sinu seadme võrguühendus taastub.
     You appear to be offline: Sa ei tundu olema võrgus.
+    Autoplay is off: Automaatne esitamine on kasutusel
+    Autoplay is on: Automaatne esitamine pole kasutusel
   IP block: YouTube on blokeerinud sinu nutiseadme IP-aadressilt videote vaatamise.
     Palun kasuta mõnda muud VPN-teenust või puhverserverit.
   MembersOnly: Kuna vajalik on sisselogimine Google'i kontoga ja tasuline liikmelisus
@@ -1155,10 +1164,6 @@ Hashtag:
   Hashtag: Teemaviide
   This hashtag does not currently have any videos: Selle teemaviite ehk haaksõna alusel
     ei leidu hetkel ühtegi videot
-Playlist will pause when current video is finished: Hetkel mängiva video lõppemisel
-  esitusloendi esitamine peatub
-Playlist will not pause when current video is finished: Hetkel mängiva video lõppemisel
-  esitusloendi esitamine jätkub
 Channel Hidden: '{channel} on lisatud kanalite filtrisse'
 Go to page: 'Ava leht: {page}'
 Channel Unhidden: '{channel} on eemaldatud kanalite filtrist'
@@ -1267,3 +1272,4 @@ KeyboardShortcutPrompt:
   Volume Down: Keera heli vaiksemaks
   Small Fast Forward: Keri edasi X sekundit hetkel kasutatava kerimiskiiruse ja taasesituskiiruse
     alusel
+shortcutLabelSeparator: ｜

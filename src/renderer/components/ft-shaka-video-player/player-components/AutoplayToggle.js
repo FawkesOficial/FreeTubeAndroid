@@ -1,27 +1,25 @@
 import shaka from 'shaka-player'
 
 import i18n from '../../../i18n/index'
-import { KeyboardShortcuts } from '../../../../constants'
-import { addKeyboardShortcutToActionTitle } from '../../../helpers/utils'
 
-export class FullWindowButton extends shaka.ui.Element {
+export class AutoplayToggle extends shaka.ui.Element {
   /**
-   * @param {boolean} fullWindowEnabled
+   * @param {boolean} autoplayEnabled
    * @param {EventTarget} events
    * @param {HTMLElement} parent
    * @param {shaka.ui.Controls} controls
    */
-  constructor(fullWindowEnabled, events, parent, controls) {
+  constructor(autoplayEnabled, events, parent, controls) {
     super(parent, controls)
 
     /** @private */
     this.button_ = document.createElement('button')
-    this.button_.classList.add('full-window-button', 'shaka-tooltip')
+    this.button_.classList.add('autoplay-toggle', 'shaka-tooltip')
 
     /** @private */
     this.icon_ = document.createElement('i')
     this.icon_.classList.add('material-icons-round')
-    this.icon_.textContent = 'open_in_full'
+    this.icon_.textContent = 'pause_circle'
 
     this.button_.appendChild(this.icon_)
 
@@ -42,21 +40,22 @@ export class FullWindowButton extends shaka.ui.Element {
     this.parent.appendChild(this.button_)
 
     /** @private */
-    this.fullWindowEnabled_ = fullWindowEnabled
+    this.autoplayEnabled_ = autoplayEnabled
 
     // listeners
 
     this.eventManager.listen(this.button_, 'click', () => {
-      events.dispatchEvent(new CustomEvent('setFullWindow', {
-        detail: !this.fullWindowEnabled_
+      events.dispatchEvent(new CustomEvent('toggleAutoplay', {
+        detail: !this.autoplayEnabled_
       }))
     })
 
-    this.eventManager.listen(events, 'setFullWindow', (/** @type {CustomEvent} */ event) => {
-      this.fullWindowEnabled_ = event.detail
-
+    const handleAutoplayValueChange = (/** @type {CustomEvent} */ event) => {
+      this.autoplayEnabled_ = event.detail
       this.updateLocalisedStrings_()
-    })
+    }
+
+    this.eventManager.listen(events, 'setAutoplay', handleAutoplayValueChange)
 
     this.eventManager.listen(events, 'localeChanged', () => {
       this.updateLocalisedStrings_()
@@ -67,14 +66,12 @@ export class FullWindowButton extends shaka.ui.Element {
 
   /** @private */
   updateLocalisedStrings_() {
-    this.icon_.textContent = this.fullWindowEnabled_ ? 'close_fullscreen' : 'open_in_full'
-    this.currentState_.textContent = this.localization.resolve(this.fullWindowEnabled_ ? 'ON' : 'OFF')
+    this.nameSpan_.textContent = i18n.t('Video.Autoplay')
 
-    const baseAriaLabel = this.fullWindowEnabled_ ? i18n.t('Video.Player.Exit Full Window') : i18n.t('Video.Player.Full Window')
-    const newLabel = addKeyboardShortcutToActionTitle(
-      baseAriaLabel,
-      KeyboardShortcuts.VIDEO_PLAYER.GENERAL.FULLWINDOW
-    )
-    this.nameSpan_.textContent = this.button_.ariaLabel = newLabel
+    this.icon_.textContent = this.autoplayEnabled_ ? 'play_circle' : 'pause_circle'
+
+    this.currentState_.textContent = this.localization.resolve(this.autoplayEnabled_ ? 'ON' : 'OFF')
+
+    this.button_.ariaLabel = this.autoplayEnabled_ ? i18n.t('Video.Player.Autoplay is on') : i18n.t('Video.Player.Autoplay is off')
   }
 }

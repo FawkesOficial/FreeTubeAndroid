@@ -181,6 +181,8 @@ User Playlists:
       This playlist has a video with a duration error: Ta playlista zawiera przynajmniej
         jeden film bez określonego czasu trwania. Będą one rozmieszczone tak, jakby
         ich czas trwania wynosił zero.
+      Video has been removed. Click here to undo.: Wideo zostało usunięte. Kliknij
+        aby powrócić.
     Search for Videos: Szukaj filmów
   Are you sure you want to delete this playlist? This cannot be undone: Czy na pewno
     chcesz usunąć tę playlistę? Nie można cofnąć tej czynności.
@@ -396,7 +398,7 @@ Settings:
     Hide FreeTube Header Logo: Schowaj logo FreeTube z paska górnego
   Player Settings:
     Player Settings: 'Odtwarzacz'
-    Play Next Video: 'Odtwórz następny film'
+    Play Next Video: 'Automatycznie odtwórz polecany film'
     Turn on Subtitles by Default: 'Domyślnie odtwarzaj z napisami'
     Autoplay Videos: 'Autoodtwarzanie filmów'
     Proxy Videos Through Invidious: 'Odtwarzaj filmy przez proxy Invidious'
@@ -450,6 +452,12 @@ Settings:
     Skip by Scrolling Over Video Player: Przewijaj film kółkiem myszy na obszarze
       odtwarzacza
     Autoplay Interruption Timer: Czas do przerwania autoodtwarzania
+    Default Viewing Mode:
+      Theater: Tryb kina
+      Picture in Picture: Obraz w obrazie
+      External Player: Zewnętrzny odtwarzacz ({externalPlayerName})
+      Default Viewing Mode: Domyślny tryb odtwarzania
+      Full Screen: Pełny ekran
   Subscription Settings:
     Subscription Settings: 'Subskrypcje'
     Hide Videos on Watch: 'Ukrywaj filmy po obejrzeniu'
@@ -849,7 +857,6 @@ Video:
   'Live Chat is unavailable for this stream. It may have been disabled by the uploader.': Czat
     na żywo jest nie dostępny dla tej transmisji. Być może został on wyłączony przez
     osobę wstawiającą.
-  Pause on Current Video: Zatrzymaj po tym filmie
   Unhide Channel: Pokaż kanał
   Hide Channel: Ukryj kanał
   More Options: Więcej opcji
@@ -882,6 +889,8 @@ Video:
       zostanie wznowione, jak tylko połączenie zostanie odzyskane.
     Skipped segment: Pominięto segment {segmentCategory}
     Full Window: Pełny ekran
+    Autoplay is off: Autoodtwarzanie jest wyłączone
+    Autoplay is on: Autoodtwarzanie jest włączone
   IP block: YouTube uniemożliwił odtworzenie filmów blokując Twój adres IP. Możesz
     spróbować przełączyć się na inny, korzystając z VPN lub proxy.
   AgeRestricted: Filmy z ograniczeniem wiekowym nie mogą być odtwarzane przez FreeTube,
@@ -1177,10 +1186,6 @@ Hashtag:
   Hashtag: Hashtag
   This hashtag does not currently have any videos: Nie ma na razie żadnych filmów
     z takim hashtagiem
-Playlist will pause when current video is finished: Playlista zatrzyma się, gdy obecny
-  film się zakończy
-Playlist will not pause when current video is finished: Playlista nie zatrzyma się,
-  gdy obecny film się zakończy
 Channel Hidden: '{channel} dodany do filtra kanałów'
 Go to page: Idź do {page}
 Channel Unhidden: '{channel} usunięty z filtra kanału'
@@ -1288,3 +1293,4 @@ KeyboardShortcutPrompt:
   Large Fast Forward: Przewiń o 10 sekund do przodu / Przewiń film do przodu, bazując
     na obecnej prędkości odtwarzania
   Stats: Pokaż statystyki filmu
+shortcutLabelSeparator: ｜

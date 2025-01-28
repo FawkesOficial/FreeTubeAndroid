@@ -190,6 +190,8 @@ User Playlists:
       This playlist has a video with a duration error: Spilunarlistinn inniheldur
         a.m.k. eitt myndskeið sem er ekki með neina tímalengd; það verður flokkað
         eins og tímalengdin sé núll.
+      Video has been removed. Click here to undo.: Myndskeiðið hefur verið fjarlægt.
+        Smelltu hér til að afturkalla.
     Search for Videos: Leita að myndskeiðum
   AddVideoPrompt:
     N playlists selected: '{playlistCount} valin'
@@ -407,11 +409,11 @@ Settings:
     Hide FreeTube Header Logo: Fela táknmynd FreeTube í haus
   Player Settings:
     Player Settings: 'Spilari'
-    Play Next Video: 'Spila næsta myndskeið'
-    Turn on Subtitles by Default: 'Sjálfgefið kveikja á skjátextum'
-    Autoplay Videos: 'Spila myndskeið sjálfkrafa'
+    Play Next Video: 'Spila sjálfkrafa myndskeið sem mælt er með'
+    Turn on Subtitles by Default: 'Sjálfgefið virkja skjátexta'
+    Autoplay Videos: 'Ræsa myndskeið sjálfkrafa'
     Proxy Videos Through Invidious: 'Beina myndskeiðum í gegnum Invidious-milliþjón'
-    Autoplay Playlists: 'Spila spilunarlista sjálfkrafa'
+    Autoplay Playlists: 'Spila sjálfkrafa myndskeið í spilunarlista'
     Enable Theatre Mode by Default: 'Sjálfgefið virkja bíóham (theater mode)'
     Default Volume: 'Sjálfgefinn hljóðstyrkur'
     Default Playback Rate: 'Sjálfgefinn afspilunarhraði'
@@ -457,6 +459,12 @@ Settings:
     Enter Fullscreen on Display Rotate: Fara í skjáfylli við snúning á skjá
     Skip by Scrolling Over Video Player: Sleppa með því að skruna ofan á myndspilara
     Autoplay Interruption Timer: Niðurtalning í stöðvun á sjálfvirkri spilun
+    Default Viewing Mode:
+      Theater: Bíóhamur
+      Default Viewing Mode: Sjálfgefinn skoðunarhamur
+      Full Screen: Skjáfylli
+      Picture in Picture: Mynd-í-mynd
+      External Player: Utanaðkomandi spilari ({externalPlayerName})
   Privacy Settings:
     Privacy Settings: 'Gagnaleynd'
     Remember History: 'Muna áhorfsferil'
@@ -900,7 +908,6 @@ Video:
   'Live Chat is unavailable for this stream. It may have been disabled by the uploader.': Spjall
     í beinni er ekki tiltækt fyrir þetta streymi. Sá sem sendi þetta inn gæti hafa
     gert það óvirkt.
-  Pause on Current Video: Setja núverandi myndskeið í bið
   Unhide Channel: Birta rás
   Hide Channel: Fela rás
   More Options: Fleiri valkostir
@@ -934,6 +941,8 @@ Video:
       sjálfkrafa áfram þegar tenging næst aftur.
     Exit Theatre Mode: Fara út úr bíóham
     Theatre Mode: Bíóhamur
+    Autoplay is off: Slökkt er á sjálfvirkri afspilun
+    Autoplay is on: Kveikt er á sjálfvirkri afspilun
   Unlisted: Óskráð
   MembersOnly: Ekki er hægt að horfa á myndskeið einungis fyrir meðlimi með FreeTube
     þar sem þau krefjast innskráningar á Google og greiddu þátttökugjaldi á rás innsendandans.
@@ -1176,10 +1185,6 @@ Hashtag:
   Hashtag: Myllumerki
   This hashtag does not currently have any videos: Þetta myllumerki er í augnablikinu
     ekki með nein myndskeið
-Playlist will pause when current video is finished: Spilunarlisti mun fara í bið eftir
-  að núverandi myndskeið klárast
-Playlist will not pause when current video is finished: Spilunarlisti mun ekki fara
-  í bið eftir að núverandi myndskeið klárast
 Go to page: Fara á {page}
 Channel Hidden: '{channel} bætt við rásasíu'
 Channel Unhidden: '{channel} fjarlægt úr rásasíu'
@@ -1287,3 +1292,4 @@ KeyboardShortcutPrompt:
   Skip by Tenths: Hoppa í prósentum í gegnum myndskeið (3 sleppir yfir á 30% tímalengdar)
   Keyboard Shortcuts: Flýtivísanir á lyklaborði
   Focus Secondary Search: Færa virkni í hinn leitarreitinn (ef annar er til staðar)
+shortcutLabelSeparator: ｜

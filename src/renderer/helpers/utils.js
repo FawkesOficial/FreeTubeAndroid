@@ -234,18 +234,11 @@ export async function openExternalLink(url) {
  * @param {object} params.query the query params to use (optional)
  * @param {string} params.searchQueryText the text to show in the search bar in the new window (optional)
  */
-export function openInternalPath({ path, query = {}, doCreateNewWindow, searchQueryText = null }) {
+export function openInternalPath({ path, query = undefined, doCreateNewWindow, searchQueryText = null }) {
   if (process.env.IS_ELECTRON && doCreateNewWindow) {
     const { ipcRenderer } = require('electron')
 
-    // Combine current document path and new "hash" as new window startup URL
-    const newWindowStartupURL = new URL(window.location.href)
-    newWindowStartupURL.hash = `${path}?${(new URLSearchParams(query)).toString()}`
-
-    ipcRenderer.send(IpcChannels.CREATE_NEW_WINDOW, {
-      windowStartupUrl: newWindowStartupURL.toString(),
-      searchQueryText
-    })
+    ipcRenderer.send(IpcChannels.CREATE_NEW_WINDOW, path, query, searchQueryText)
   } else {
     router.push({
       path,
@@ -1048,12 +1041,17 @@ export function addKeyboardShortcutToActionTitle(actionTitle, shortcut) {
 
 /**
  * @param {string} localizedActionTitle
- * @param {string} unlocalizedShortcut
+ * @param {string|string[]} sometimesManyUnlocalizedShortcuts
  * @returns {string} the localized action title with keyboard shortcut
  */
-export function localizeAndAddKeyboardShortcutToActionTitle(localizedActionTitle, unlocalizedShortcut) {
-  const localizedShortcut = getLocalizedShortcut(unlocalizedShortcut)
-  return addKeyboardShortcutToActionTitle(localizedActionTitle, localizedShortcut)
+export function localizeAndAddKeyboardShortcutToActionTitle(localizedActionTitle, sometimesManyUnlocalizedShortcuts) {
+  let unlocalizedShortcuts = sometimesManyUnlocalizedShortcuts
+  if (!Array.isArray(sometimesManyUnlocalizedShortcuts)) {
+    unlocalizedShortcuts = [unlocalizedShortcuts]
+  }
+  const localizedShortcuts = unlocalizedShortcuts.map((s) => getLocalizedShortcut(s))
+  const shortcutLabelSeparator = i18n.t('shortcutLabelSeparator')
+  return addKeyboardShortcutToActionTitle(localizedActionTitle, localizedShortcuts.join(shortcutLabelSeparator))
 }
 
 /**

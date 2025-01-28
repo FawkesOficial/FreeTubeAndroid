@@ -161,6 +161,7 @@ User Playlists:
       This playlist is already being used for quick bookmark.: 此播放列表已被用于快速书签。
       This playlist has a video with a duration error: 此播放列表包含至少一个没有持续时间的视频，排序时将按照持续时间为
         0 对待此视频。
+      Video has been removed. Click here to undo.: 视频已被删除。单击此处撤销。
     Search for Videos: 搜索视频
   Are you sure you want to delete this playlist? This cannot be undone: 你确定要删除此播放列表吗？此操作无法撤销。
   Sort By:
@@ -360,11 +361,11 @@ Settings:
     Hide FreeTube Header Logo: 隐藏 FreeTube 标题徽标
   Player Settings:
     Player Settings: '播放器'
-    Play Next Video: '播放下一视频'
+    Play Next Video: '自动播放推荐的视频'
     Turn on Subtitles by Default: '默认开启字幕'
-    Autoplay Videos: '自动播放视频'
+    Autoplay Videos: '自动开始视频'
     Proxy Videos Through Invidious: '通过Invidious代理视频'
-    Autoplay Playlists: '自动播放列表'
+    Autoplay Playlists: '自动播放播放列表视频'
     Enable Theatre Mode by Default: '默认允许剧场模式'
     Default Volume: '默认音量'
     Default Playback Rate: '默认回放速率'
@@ -408,6 +409,12 @@ Settings:
     Enter Fullscreen on Display Rotate: 屏幕旋转时进入全屏
     Skip by Scrolling Over Video Player: 从视频播放器一侧滚动到另一侧来跳过视频
     Autoplay Interruption Timer: 自动播放中断计时器
+    Default Viewing Mode:
+      Default Viewing Mode: 默认观看模式
+      Picture in Picture: 画中画
+      External Player: 外部播放器({externalPlayerName})
+      Theater: 影院
+      Full Screen: 全屏
   Subscription Settings:
     Subscription Settings: '订阅'
     Hide Videos on Watch: '观看时隐藏视频'
@@ -755,7 +762,6 @@ Video:
   Show Super Chat Comment: 显示超级聊天评论
   Upcoming: 即将到来
   'Live Chat is unavailable for this stream. It may have been disabled by the uploader.': 实时聊天对此音视频流不可用。上传者可能禁用了它。
-  Pause on Current Video: 当前视频播完后不自动播放列表中下一视频
   Unhide Channel: 显示频道
   Hide Channel: 隐藏频道
   More Options: 更多选项
@@ -786,6 +792,8 @@ Video:
     TranslatedCaptionTemplate: '{language} (翻译自 "{originalLanguage}")'
     Exit Theatre Mode: 推出影院模式
     Skipped segment: 跳过了 {segmentCategory} 部分
+    Autoplay is off: 自动播放关闭
+    Autoplay is on: 自动播放开启
   IP block: 你的 IP 地址被 Youtube 禁止观看视频。请试着切换到不同的 VPN 或代理。
   MembersOnly: 无法用 FreeTube 观看仅供会员的视频，因这些视频需要 Google 登录以及上传者频道的付费会员身份。
   AgeRestricted: 无法用 FreeTube 观看受限年龄的视频，因这些视频需要 Google 登录并使用验证过年龄的 YouTube 账户。
@@ -1010,8 +1018,6 @@ Ok: 好
 Hashtag:
   Hashtag: 话题标签
   This hashtag does not currently have any videos: 此话题标签下当前没有任何短视频
-Playlist will pause when current video is finished: 当前视频播完后播放列表会暂停
-Playlist will not pause when current video is finished: 当前视频播完后播放列表不会暂停
 Go to page: 转到页{page}
 Channel Hidden: '{channel} 频道已添加到频道过滤器'
 Channel Unhidden: 从频道过滤器删除了{channel} 频道
@@ -1110,3 +1116,4 @@ KeyboardShortcutPrompt:
   Minimize Window: 最小化窗口
   Zoom Out: 放大
   Next Chapter: 下一章节
+shortcutLabelSeparator: ｜

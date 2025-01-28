@@ -54,6 +54,8 @@
 :deep(.shaka-overflow-menu),
 :deep(.shaka-settings-menu) {
   background: var(--card-bg-color) !important;
+  max-height: 200px;
+
 }
 
 :deep(.shaka-overflow-menu button),
@@ -295,6 +297,17 @@
   :deep(.shaka-tooltips-on button:focus-visible::after),
   :deep(.shaka-tooltips-on button:hover::after) {
     margin-bottom: 8px;
+  }
+
+  /*
+    similar to the styling that shaka-player applies with last-child
+    needed as we have made the controls a lot wider than they were intended to be :/
+   */
+  :deep(.shaka-tooltips-on button:nth-last-child(2):active::after),
+  :deep(.shaka-tooltips-on button:nth-last-child(2):focus-visible::after),
+  :deep(.shaka-tooltips-on button:nth-last-child(2):hover::after) {
+    left: 32px;
+    transform: translateX(-80%);
   }
 }
 

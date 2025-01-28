@@ -195,6 +195,8 @@ User Playlists:
       There was an issue with updating this playlist.: Сталася помилка при оновленні
         цієї добірки.
       There were no videos to remove.: Відео для видалення не знайдено.
+      Video has been removed. Click here to undo.: Відео видалено. Натисніть тут,
+        щоб скасувати.
     Search for Videos: Пошук відео
   The playlist has been successfully exported: Добірку успішно експортовано
   Export Playlist: Експортувати цю добірку
@@ -320,7 +322,7 @@ Settings:
       Light: 'Світла'
       Dracula: 'Дракула'
       System Default: Тема системи
-      Catppuccin Mocha: Catppuccin Mocha
+      Catppuccin Mocha: Капучино мокко
       Hot Pink: Гарячий рожевий
       Pastel Pink: Пастельний рожевий
       Gruvbox Dark: Gruvbox Темний
@@ -328,7 +330,7 @@ Settings:
       Nordic: Нордичний
       Gruvbox Light: Gruvbox Світлий
       Solarized Dark: Solarized Темна
-      Catppuccin Frappe: Catppuccin Frappe
+      Catppuccin Frappe: Капучино фрапе
     Main Color Theme:
       Main Color Theme: 'Основна кольорова тема'
       Red: 'Червона'
@@ -386,31 +388,31 @@ Settings:
       Solarized Red: Solarized Червоний
       Gruvbox Dark Yellow: Gruvbox Темно Жовтий
       Solarized Blue: Solarized Голубий
-      Catppuccin Frappe Rosewater: Catppuccin Frappe Rosewater
-      Catppuccin Frappe Sapphire: Catppuccin Frappe Sapphire
-      Catppuccin Frappe Blue: Catppuccin Frappe Blue
-      Catppuccin Frappe Lavender: Catppuccin Frappe Lavender
-      Catppuccin Frappe Teal: Catppuccin Frappe Teal
-      Catppuccin Frappe Flamingo: Catppuccin Frappe Flamingo
-      Catppuccin Frappe Green: Catppuccin Frappe Green
-      Catppuccin Frappe Red: Catppuccin Frappe Red
-      Catppuccin Frappe Peach: Catppuccin Frappe Peach
-      Catppuccin Frappe Pink: Catppuccin Frappe Pink
-      Catppuccin Frappe Sky: Catppuccin Frappe Sky
-      Catppuccin Frappe Mauve: Catppuccin Frappe Mauve
-      Catppuccin Frappe Maroon: Catppuccin Frappe Maroon
-      Catppuccin Frappe Yellow: Catppuccin Frappe Yellow
+      Catppuccin Frappe Rosewater: Капучино фрапе з рожевою водою
+      Catppuccin Frappe Sapphire: Капучино фрапе сапфіровий
+      Catppuccin Frappe Blue: Капучино фрапе синій
+      Catppuccin Frappe Lavender: Капучино фрапе лавандовий
+      Catppuccin Frappe Teal: Капучино фрапе бірюзовий
+      Catppuccin Frappe Flamingo: Капучино фрапе Фламінго
+      Catppuccin Frappe Green: Капучино фрапе зелений
+      Catppuccin Frappe Red: Капучино фрапе червоний
+      Catppuccin Frappe Peach: Капучино фрапе персиковий
+      Catppuccin Frappe Pink: Капучино фрапе рожевий
+      Catppuccin Frappe Sky: Капучино фрапе небесний
+      Catppuccin Frappe Mauve: Капучино фрапе фіолетовий
+      Catppuccin Frappe Maroon: Капучино фрапе бордовий
+      Catppuccin Frappe Yellow: Капучино фрапе жовтий
     Secondary Color Theme: 'Другорядна кольорова тема'
         #* Main Color Theme
     Hide Side Bar Labels: Сховати мітки бічної панелі
     Hide FreeTube Header Logo: Сховати логотип FreeTube із заголовка
   Player Settings:
     Player Settings: 'Плеєр'
-    Play Next Video: 'Грати наступне відео'
-    Turn on Subtitles by Default: 'Увімкнути субтитри за замовченням'
-    Autoplay Videos: 'Автоматичне відтворення відео'
+    Play Next Video: 'Автовідтворення рекомендованих відео'
+    Turn on Subtitles by Default: 'Увімкнути субтитри за замовчуванням'
+    Autoplay Videos: 'Автоматично запускати відео'
     Proxy Videos Through Invidious: 'Проксі-відео через Invidious'
-    Autoplay Playlists: 'Автовідтворення добірок'
+    Autoplay Playlists: 'Автовідтворення відео з добірки'
     Enable Theatre Mode by Default: 'Типово увімкнути режим театру'
     Default Volume: 'Типова гучність'
     Default Playback Rate: 'Типова швидкість відтворення'
@@ -458,6 +460,12 @@ Settings:
       екрана
     Skip by Scrolling Over Video Player: Пропустити гортанням відеопрогравача
     Autoplay Interruption Timer: Таймер переривання автозапуску
+    Default Viewing Mode:
+      Picture in Picture: Картинка в картинці
+      Theater: Театр
+      External Player: Зовнішній плеєр ({externalPlayerName})
+      Default Viewing Mode: Режим перегляду за замовчуванням
+      Full Screen: Повноекранний режим
   Privacy Settings:
     Privacy Settings: 'Конфіденційність'
     Remember History: 'Зберігати історію переглядів'
@@ -587,9 +595,9 @@ Settings:
       Label: Експортувати добірки для старих версій FreeTube
       Tooltip: "Ця опція експортує відео з усіх добірок в одну добірку під назвою
         \"Улюблені\".\nЯк експортувати та імпортувати відео з добірок для старої версії
-        FreeTube:\n1. Експортуйте свої добірки з увімкненою цією опцією.\n2. Видаліть
-        усі свої наявні добірки за допомогою опції \"Видалити всі добірки\" в налаштуваннях
-        конфіденційності.\n3. Запустіть стару версію FreeTube та імпортуйте експортовані
+        FreeTube:\n1. Експортуйте свої добірки увімкнувши цю опцію.\n2. Видаліть усі
+        свої наявні добірки за допомогою опції \"Вилучити всі добірки\" в налаштуваннях
+        приватності..\n3. Запустіть стару версію FreeTube та імпортуйте експортовані
         добірки."
   Proxy Settings:
     Error getting network information. Is your proxy configured properly?: Помилка
@@ -888,7 +896,6 @@ Video:
   Upcoming: Незабаром
   'Live Chat is unavailable for this stream. It may have been disabled by the uploader.': Спілкування
     наживо недоступне для цієї трансляції. Можливо, вивантажувач вимкнув його.
-  Pause on Current Video: Призупинити на поточному відео
   Unhide Channel: Показати канал
   Hide Channel: Сховати канал
   Player:
@@ -920,6 +927,8 @@ Video:
     Theatre Mode: Режим кінотеатру
     Hide Stats: Сховати статистику
     Skipped segment: Пропущено сегмент {segmentCategory}
+    Autoplay is off: Автовідтворення вимкнено
+    Autoplay is on: Автовідтворення увімкнено
   IP block: YouTube заблокував вашу IP-адресу для перегляду відео. Будь ласка, спробуйте
     змінити VPN або проксі.
   Unlisted: Не в списку
@@ -1163,10 +1172,6 @@ Ok: Гаразд
 Hashtag:
   Hashtag: Хештег
   This hashtag does not currently have any videos: За цим хештегом наразі немає відео
-Playlist will pause when current video is finished: Список відтворення призупиняється,
-  коли поточне відео завершено
-Playlist will not pause when current video is finished: Список відтворення не призупиняється,
-  коли поточне відео завершено
 Channel Hidden: '{channel} додано до фільтра каналу'
 Go to page: Перейти до {page}
 Channel Unhidden: '{channel} вилучено з фільтра каналу'
@@ -1273,3 +1278,4 @@ KeyboardShortcutPrompt:
   Last Chapter: Останній розділ
   Skip by Tenths: Пропустити відео на певний відсоток (3 пропуски до 30% тривалості)
   Next Chapter: Наступний розділ
+shortcutLabelSeparator: ｜

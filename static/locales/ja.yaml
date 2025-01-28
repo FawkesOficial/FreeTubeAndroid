@@ -163,6 +163,7 @@ User Playlists:
       This playlist is already being used for quick bookmark.: この再生リストはすでにクイックブックマークとして使用されています。
       This playlist has a video with a duration error: このプレイリストには、再生時間のない動画が少なくとも
         1 つ含まれています。これらの動画は、再生時間が 0 であるかのように並べられます。
+      Video has been removed. Click here to undo.: 動画が削除されました。元に戻すにはここをクリック。
     Search for Videos: 動画検索
   Save Changes: 変更の保存
   Move Video Up: 動画を上へ移動
@@ -362,11 +363,11 @@ Settings:
     Hide FreeTube Header Logo: FreeTube ヘッダー ロゴの非表示
   Player Settings:
     Player Settings: 'プレーヤー'
-    Play Next Video: '次の動画の自動再生'
+    Play Next Video: 'おすすめの動画を自動再生'
     Turn on Subtitles by Default: 'デフォルトで字幕を有効にする'
-    Autoplay Videos: '動画の自動再生'
+    Autoplay Videos: '動画を自動的に再生する'
     Proxy Videos Through Invidious: '動画を Invidious プロキシを経由して取得'
-    Autoplay Playlists: '再生リストの自動再生'
+    Autoplay Playlists: '再生リスト動画の自動再生'
     Enable Theatre Mode by Default: 'デフォルトでシアターモードを有効にする'
     Default Volume: 'デフォルトの音量'
     Default Playback Rate: 'デフォルトの再生速度'
@@ -410,6 +411,12 @@ Settings:
     Enter Fullscreen on Display Rotate: 画面の回転時に全画面表示にする
     Skip by Scrolling Over Video Player: 動画プレーヤーをスクロールして動画をスキップ
     Autoplay Interruption Timer: 自動再生の停止タイマー
+    Default Viewing Mode:
+      Theater: シアター
+      Default Viewing Mode: デフォルト表示モード
+      Picture in Picture: 子画面表示
+      Full Screen: フルスクリーン
+      External Player: 外部プレーヤー ({externalPlayerName})
   Subscription Settings:
     Subscription Settings: '登録チャンネル'
     Hide Videos on Watch: '視聴済みの動画を非表示にする'
@@ -419,8 +426,8 @@ Settings:
     'Limit the number of videos displayed for each channel': 各チャンネルに表示する動画の数を制限する
     To: 上限
   Privacy Settings:
-    Save Watched Progress: 再生位置の保存
-    Remember History: 視聴履歴を保存する
+    Save Watched Progress: 再生位置を記憶する
+    Remember History: 視聴履歴を記憶する
     Watch history has been cleared: 視聴履歴を削除しました
     Are you sure you want to remove your entire watch history?: 視聴履歴をすべて削除しますか？
     Remove Watch History: 視聴履歴の削除
@@ -428,7 +435,7 @@ Settings:
     Are you sure you want to clear out your search cache?: 検索キャッシュを削除しますか？
     Clear Search Cache: 検索キャッシュの削除
     Privacy Settings: プライバシー
-    Are you sure you want to remove all subscriptions and profiles?  This cannot be undone.: すべての登録チャンネルとプロファイルを削除しますか？元に戻せません。
+    Are you sure you want to remove all subscriptions and profiles?  This cannot be undone.: すべての登録チャンネルとプロファイルを削除しますか？これは元に戻せません。
     Remove All Subscriptions / Profiles: 登録とプロファイルをすべて削除
     Save Watched Videos With Last Viewed Playlist: 視聴済み動画を最後に見た再生リストと共に保存する
     Remove All Playlists: 再生リストをすべて削除
@@ -745,7 +752,7 @@ Video:
       shuffling playlists: シャッフル再生リスト
       reversing playlists: 再生リストを反転させる
       opening specific video in a playlist (falling back to opening the video): 再生リストで特定の動画を開く
-        (ビデオを開く前にフォールバック)
+        (動画を開く前にフォールバック)
       opening playlists: 再生リストを開く
       setting a playback rate: 再生レートの設定
       starting video at offset: オフセットで動画の再生
@@ -758,7 +765,6 @@ Video:
   Scroll to Bottom: 下までスクロール
   Upcoming: 近日公開
   'Live Chat is unavailable for this stream. It may have been disabled by the uploader.': この配信ではライブチャットは使用できません。配信者によって無効に設定されているようです。
-  Pause on Current Video: 現在の動画を一時停止
   Hide Channel: チャンネルを非表示
   Unhide Channel: チャンネルを表示
   More Options: その他の設定
@@ -789,6 +795,8 @@ Video:
     Hide Stats: 統計を隠す
     Take Screenshot: スクリーンショットを撮る
     Show Stats: 統計を表示
+    Autoplay is off: 自動再生 オフ
+    Autoplay is on: 自動再生 オン
   IP block: YouTube はあなたのIPアドレスからの動画視聴をブロックしました。別の VPN またはプロキシに切り替えてみてください。
   Unlisted: 限定公開
   MembersOnly: メンバー限定動画は Google にログインし、投稿チャンネルに課金する必要があるので FreeTube から直接見ることはできません。
@@ -961,7 +969,7 @@ Tooltips:
       はクリックしたリンクをデフォルトのブラウザで開きます。\n"
     Open Deep Links In New Window: FreeTube に渡された URL は、ブラウザの拡張機能やコマンドライン引数などによって、新しいウィンドウで開かれます。
   External Player Settings:
-    Custom External Player Arguments: '外部プレイヤーに渡したいカスタムコマンドライン引数。'
+    Custom External Player Arguments: '外部プレーヤーに渡したいカスタムコマンドライン引数。'
     Ignore Warnings: 現在の外部プレーヤーが、現在のアクションに未対応の場合（再生リストを逆順にするなど）に警告を抑制します。
     Custom External Player Executable: デフォルトでは、FreeTube は選択した外部プレーヤーが PATH 環境変数を介して見つかると想定します。必要に応じて、カスタム
       パスをここで設定できます。
@@ -1022,8 +1030,6 @@ Ok: オーケー
 Hashtag:
   Hashtag: ハッシュタグ
   This hashtag does not currently have any videos: このハッシュタグには現在動画がありません
-Playlist will pause when current video is finished: 現在の動画が終了すると、再生リストが一時停止します
-Playlist will not pause when current video is finished: 現在の動画が終了しても、再生リストは一旦停止しません
 Close Banner: バナーを閉じる
 Go to page: '{page} を表示'
 Search character limit: 検索クエリが {searchCharacterLimit} 文字の制限を超えています
@@ -1110,7 +1116,7 @@ KeyboardShortcutPrompt:
       General: 'アプリ: 一般'
   Show Keyboard Shortcuts: キーボード ショートカットを表示する
   Picture in Picture: 子画面モードの切り替え
-  Large Rewind: 10秒巻き戻し / 現在の動画再生速度に基づき動画を巻き戻す
+  Large Rewind: 10秒巻き戻し / 現在の動画再生速度に基づいて動画を巻き戻す
   Close Window: ウィンドウを閉じる
   Search in New Window: 新しいウィンドウで検索
   Volume Down: 音量を下げる
@@ -1122,3 +1128,4 @@ KeyboardShortcutPrompt:
   Last Chapter: 前のチャプター
   Next Chapter: 次のチャプター
   Skip by Tenths: 動画をパーセンテージでスキップ (3回スキップで全体の30%に移動)
+shortcutLabelSeparator: ｜

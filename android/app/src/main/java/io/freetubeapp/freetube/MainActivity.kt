@@ -87,6 +87,8 @@ class MainActivity : AppCompatActivity() {
     workQueue
   )
 
+  // region Overridden methods
+
   @SuppressLint("SetJavaScriptEnabled")
   @Suppress("DEPRECATION")
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -317,25 +319,6 @@ class MainActivity : AppCompatActivity() {
     bgWebView.settings.javaScriptEnabled = true
   }
 
-  private fun listenForActivityResults(listener: (ActivityResult?) -> Unit) {
-    activityResultListeners.add(listener)
-  }
-
-  fun launchIntent(intent: Intent): Promise<ActivityResult?, Exception> {
-    return Promise(threadPoolExecutor, {
-      resolve,
-      reject ->
-      try {
-        listenForActivityResults {
-          resolve(it)
-        }
-        activityResultLauncher.launch(intent)
-      } catch (exception: Exception) {
-        reject(exception)
-      }
-    })
-  }
-
   override fun onConfigurationChanged(newConfig: Configuration) {
     super.onConfigurationChanged(newConfig)
     when (newConfig.uiMode and Configuration.UI_MODE_NIGHT_MASK) {
@@ -389,5 +372,26 @@ class MainActivity : AppCompatActivity() {
     webView.destroy()
     // call `super`
     super.onDestroy()
+  }
+
+  // endregion
+
+  private fun listenForActivityResults(listener: (ActivityResult?) -> Unit) {
+    activityResultListeners.add(listener)
+  }
+
+  fun launchIntent(intent: Intent): Promise<ActivityResult?, Exception> {
+    return Promise(threadPoolExecutor, {
+        resolve,
+        reject ->
+      try {
+        listenForActivityResults {
+          resolve(it)
+        }
+        activityResultLauncher.launch(intent)
+      } catch (exception: Exception) {
+        reject(exception)
+      }
+    })
   }
 }

@@ -45,10 +45,9 @@ import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
 
 
-class MainActivity : AppCompatActivity(), OnRequestPermissionsResultCallback {
+class MainActivity : AppCompatActivity() {
 
   private lateinit var binding: ActivityMainBinding
-  private lateinit var permissionsListeners: MutableList<(Int, Array<String?>, IntArray) -> Unit>
   private lateinit var activityResultListeners: MutableList<(ActivityResult?) -> Unit>
   private lateinit var keepAliveService: KeepAliveService
   private lateinit var keepAliveIntent: Intent
@@ -57,7 +56,7 @@ class MainActivity : AppCompatActivity(), OnRequestPermissionsResultCallback {
   lateinit var bgWebView: BotGuardWebView
   lateinit var jsInterface: FreeTubeJavaScriptInterface
   lateinit var bgJsInterface: BotGuardJavascriptInterface
-  lateinit var activityResultLauncher: ActivityResultLauncher<Intent>
+  private lateinit var activityResultLauncher: ActivityResultLauncher<Intent>
   lateinit var content: View
   var consoleMessages: MutableList<JSONObject> = mutableListOf()
   var showSplashScreen: Boolean = true
@@ -145,9 +144,6 @@ class MainActivity : AppCompatActivity(), OnRequestPermissionsResultCallback {
       WindowCompat.getInsetsController(window, window.decorView)
     windowInsetsController.systemBarsBehavior =
       WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-
-    // initialize the list of listeners for permissions handlers
-    permissionsListeners = arrayOf<(Int, Array<String?>, IntArray) -> Unit>().toMutableList()
 
     binding = ActivityMainBinding.inflate(layoutInflater)
     setContentView(binding.root)
@@ -322,10 +318,6 @@ class MainActivity : AppCompatActivity(), OnRequestPermissionsResultCallback {
     bgWebView.settings.javaScriptEnabled = true
   }
 
-  fun listenForPermissionsCallbacks(listener: (Int, Array<String?>, IntArray) -> Unit) {
-    permissionsListeners.add(listener)
-  }
-
   private fun listenForActivityResults(listener: (ActivityResult?) -> Unit) {
     activityResultListeners.add(listener)
   }
@@ -345,13 +337,9 @@ class MainActivity : AppCompatActivity(), OnRequestPermissionsResultCallback {
     })
   }
 
-  // region webview methods
-
-  //endregion
-
   fun readTextAsset(assetName: String) : String {
     val lines = mutableListOf<String>()
-    val reader: BufferedReader = BufferedReader(InputStreamReader(assets.open(assetName)))
+    val reader = BufferedReader(InputStreamReader(assets.open(assetName)))
     try {
       var line = reader.readLine()
       while(line != null) {
@@ -382,17 +370,6 @@ class MainActivity : AppCompatActivity(), OnRequestPermissionsResultCallback {
         webView.dispatchEvent("enabled-dark-mode")
       }
     }
-  }
-
-  override fun onRequestPermissionsResult(
-    requestCode: Int, permissions: Array<String?>,
-    grantResults: IntArray
-  ) {
-    super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-    permissionsListeners.forEach {
-      it(requestCode, permissions, grantResults)
-    }
-    permissionsListeners.clear()
   }
 
   /**

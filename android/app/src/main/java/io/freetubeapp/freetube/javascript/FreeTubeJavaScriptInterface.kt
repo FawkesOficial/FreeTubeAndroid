@@ -719,12 +719,12 @@ class FreeTubeJavaScriptInterface {
 
   // endregion
 
-  // region UNUSED SHOULD BE OKAY TO DELETE 🤞
+  /**
   @JavascriptInterface
   fun queueFetchBody(id: String, body: String) {
     if (body != "undefined") {
       context.pendingRequestBodies[id] = body
     }
   }
-  // endregion
+  */
 }

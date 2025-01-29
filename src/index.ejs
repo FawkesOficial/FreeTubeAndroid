@@ -7,6 +7,9 @@
       <script>
         window.ofetch = window.fetch
         window.fetch = async (...args) => {
+
+          // TODO refactor this to work for video streaming
+          /*
           const requestId = crypto.randomUUID()
           let body
           for (const arg of args) {
@@ -31,11 +34,10 @@
                 }
               }
             }
-          }
+          }*/
 
           if (typeof args[0] === 'string' && args[0].startsWith('file://')) {
             // forward to xml http request
-            /** @type {Response} */
             const response = await new Promise((resolve, reject) => {
               const req = new XMLHttpRequest()
               req.responseType = 'arraybuffer'

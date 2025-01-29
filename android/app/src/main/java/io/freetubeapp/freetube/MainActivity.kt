@@ -212,11 +212,14 @@ class MainActivity : AppCompatActivity(), OnRequestPermissionsResultCallback {
       }
     }
     webView.webViewClient = object: WebViewClient() {
-      // TODO refactor this to work for video streaming
+
       override fun shouldInterceptRequest(
         view: WebView?,
         request: WebResourceRequest?
       ): WebResourceResponse? {
+        // TODO refactor this to work for video streaming
+        /*
+        // LEFTOVER iOS WORKAROUND CODE
         if (request!!.requestHeaders.containsKey("x-user-agent")) {
           with (URL(request!!.url.toString()).openConnection() as HttpURLConnection) {
             requestMethod = request.method
@@ -277,6 +280,7 @@ class MainActivity : AppCompatActivity(), OnRequestPermissionsResultCallback {
             return WebResourceResponse(this.contentType, this.contentEncoding, inputStream!!)
           }
         }
+        */
         return super.shouldInterceptRequest(view, request)
       }
       override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {

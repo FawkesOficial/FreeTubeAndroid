@@ -63,7 +63,6 @@ class MainActivity : AppCompatActivity() {
   var darkMode: Boolean = false
   var paused: Boolean = false
   var isInAPrompt: Boolean = false
-  var pendingRequestBodies: MutableMap<String, String> = mutableMapOf()
   /*
    * Gets the number of available cores
    * (not always the same as the maximum number of cores)

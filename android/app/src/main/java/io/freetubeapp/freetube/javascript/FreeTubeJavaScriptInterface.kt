@@ -377,6 +377,28 @@ class FreeTubeJavaScriptInterface {
     manager.cancelAll()
   }
 
+  @JavascriptInterface
+  fun getFileNameFromUri(uri: String): String {
+    var result: String? = null
+    val cursor = context.contentResolver.query(Uri.parse(uri),  null, null, null, null)
+    try {
+      if (cursor != null && cursor.moveToFirst()) {
+        val index = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+        if (index != -1) {
+          result = cursor.getString(index)
+        }
+      }
+    } finally {
+      cursor!!.close()
+    }
+
+    if (result == null) {
+      result = uri.split(Regex("(/)|(%2F)")).last()
+    }
+
+    return result
+  }
+
   /**
    * reads a file from storage
    */
@@ -461,50 +483,34 @@ class FreeTubeJavaScriptInterface {
   }
 
   @JavascriptInterface
-  fun getFileNameFromUri(uri: String): String {
-    var result: String? = null
-    val cursor = context.contentResolver.query(Uri.parse(uri),  null, null, null, null)
-    try {
-      if (cursor != null && cursor.moveToFirst()) {
-        val index = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
-        if (index != -1) {
-          result = cursor.getString(index)
-        }
-      }
-    } finally {
-      cursor!!.close()
-    }
-
-    if (result == null) {
-      result = uri.split(Regex("(/)|(%2F)")).last()
-    }
-
-    return result
-  }
-
-  @JavascriptInterface
   fun requestOpenDialog(fileTypes: String): String {
-    val promise = jsCommunicator.jsPromise()
-    val openDialogIntent = Intent(Intent.ACTION_GET_CONTENT)
-      .setType("*/*")
-      .putExtra(Intent.EXTRA_MIME_TYPES, fileTypes.split(",").toTypedArray())
+    return Promise(context.threadPoolExecutor, {
+      resolve,
+      reject ->
+        val openDialogIntent = Intent(Intent.ACTION_GET_CONTENT)
+          .setType("*/*")
+          .putExtra(Intent.EXTRA_MIME_TYPES, fileTypes.split(",").toTypedArray())
 
-    context.listenForActivityResults {
-        result: ActivityResult? ->
-      if (result!!.resultCode == Activity.RESULT_CANCELED) {
-        jsCommunicator.resolve(promise, "USER_CANCELED")
-      }
-      try {
-        val uri = result!!.data!!.data
-        var mimeType = context.contentResolver.getType(uri!!)
-        val fileName = getFileNameFromUri(uri.toString())
-        jsCommunicator.resolve(promise, "{ \"uri\": \"${uri}\", \"type\": \"${mimeType}\", \"fileName\": \"${fileName}\" }")
-      } catch (ex: Exception) {
-        jsCommunicator.reject(promise, ex.toString())
-      }
-    }
-    context.activityResultLauncher.launch(openDialogIntent)
-    return promise
+        context.listenForActivityResults {
+          result: ActivityResult? ->
+          if (result!!.resultCode == Activity.RESULT_CANCELED) {
+            resolve("USER_CANCELED")
+          }
+          try {
+            val uri = result.data!!.data
+            val mimeType = context.contentResolver.getType(uri!!)
+            val fileName = getFileNameFromUri(uri.toString())
+            val payload = JSONObject()
+            payload.put("uri", uri)
+            payload.put("type", mimeType)
+            payload.put("fileName", fileName)
+            resolve(payload)
+          } catch (ex: Exception) {
+            reject(ex.toString())
+          }
+        }
+        context.activityResultLauncher.launch(openDialogIntent)
+    }).addJsCommunicator(jsCommunicator)
   }
 
   @JavascriptInterface

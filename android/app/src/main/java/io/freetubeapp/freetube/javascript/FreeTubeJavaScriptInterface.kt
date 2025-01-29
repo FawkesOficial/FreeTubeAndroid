@@ -27,6 +27,7 @@ import io.freetubeapp.freetube.MainActivity
 import io.freetubeapp.freetube.MediaControlsReceiver
 import io.freetubeapp.freetube.R
 import io.freetubeapp.freetube.helpers.Promise
+import io.freetubeapp.freetube.helpers.hexToColour
 import io.freetubeapp.freetube.helpers.readBytes
 import io.freetubeapp.freetube.helpers.readText
 import io.freetubeapp.freetube.helpers.writeBytes
@@ -48,6 +49,7 @@ class FreeTubeJavaScriptInterface {
   private var lastNotification: Notification? = null
   private var keepScreenOn: Boolean = false
   private val jsCommunicator: AsyncJSCommunicator
+
   companion object {
     private const val DATA_DIRECTORY = "data://"
     private const val CHANNEL_ID = "media_controls"
@@ -63,32 +65,7 @@ class FreeTubeJavaScriptInterface {
     jsCommunicator = AsyncJSCommunicator(main.webView)
   }
 
-  @JavascriptInterface
-  fun getLogs(): String {
-    var logs = "["
-    for (message in context.consoleMessages) {
-      logs += "${message},"
-    }
-    // get rid of trailing comma
-    logs = logs.substring(0, logs.length - 1)
-    logs += "]"
-    return logs
-  }
-
-  /**
-   * @param directory a shortened directory uri
-   * @return a full directory uri
-   */
-  @JavascriptInterface
-  fun getDirectory(directory: String): String {
-    val path =  if (directory == DATA_DIRECTORY) {
-      // this is the directory cordova gave us access to before
-      context.getExternalFilesDir(null)!!.parent
-    } else {
-      directory
-    }
-    return path
-  }
+  // region Media Notifications
 
   /**
    * retrieves actions for the media controls
@@ -377,6 +354,25 @@ class FreeTubeJavaScriptInterface {
     manager.cancelAll()
   }
 
+  // endregion
+
+  // region File Helpers
+
+  /**
+   * @param directory a shortened directory uri
+   * @return a full directory uri
+   */
+  @JavascriptInterface
+  fun getDirectory(directory: String): String {
+    val path =  if (directory == DATA_DIRECTORY) {
+      // this is the directory cordova gave us access to before
+      context.getExternalFilesDir(null)!!.parent
+    } else {
+      directory
+    }
+    return path
+  }
+
   @JavascriptInterface
   fun getFileNameFromUri(uri: String): String {
     var result: String? = null
@@ -399,6 +395,41 @@ class FreeTubeJavaScriptInterface {
     return result
   }
 
+  @JavascriptInterface
+  fun revokePermissionForTree(treeUri: String) {
+    context.revokeUriPermission(Uri.parse(treeUri), Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+  }
+
+  @JavascriptInterface
+  fun listFilesInTree(tree: String): String {
+    val directory = DocumentFile.fromTreeUri(context, Uri.parse(tree))
+    val files = directory!!.listFiles().joinToString(",") { file ->
+      "{ \"uri\": \"${file.uri}\", \"fileName\": \"${file.name}\", \"isFile\": ${file.isFile}, \"isDirectory\": ${file.isDirectory} }"
+    }
+    return "[$files]"
+  }
+
+  @JavascriptInterface
+  fun createFileInTree(tree: String, fileName: String): String {
+    val directory = DocumentFile.fromTreeUri(context, Uri.parse(tree))
+    return directory!!.createFile("*/*", fileName)!!.uri.toString()
+  }
+
+  @JavascriptInterface
+  fun createDirectoryInTree(tree: String, fileName: String): String {
+    val directory = DocumentFile.fromTreeUri(context, Uri.parse(tree))
+    return directory!!.createDirectory(fileName)!!.uri.toString()
+  }
+
+  @JavascriptInterface
+  fun deleteFileInTree(fileUri: String): Boolean {
+    val file = DocumentFile.fromTreeUri(context, Uri.parse(fileUri))
+    return file!!.delete()
+  }
+
+  // endregion
+
+  // region IO
   /**
    * reads a file from storage
    */
@@ -450,7 +481,9 @@ class FreeTubeJavaScriptInterface {
       }
     }).addJsCommunicator(jsCommunicator)
   }
+  // endregion
 
+  // region Dialogs
   /**
    * requests a save dialog, resolves a js promise when done, resolves with `USER_CANCELED` if the user cancels
    * @return a js promise id
@@ -539,44 +572,20 @@ class FreeTubeJavaScriptInterface {
     }).addJsCommunicator(jsCommunicator)
   }
 
-  @JavascriptInterface
-  fun revokePermissionForTree(treeUri: String) {
-    context.revokeUriPermission(Uri.parse(treeUri), Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
-  }
+  // endregion
+
+  // region System
 
   @JavascriptInterface
-  fun listFilesInTree(tree: String): String {
-    val directory = DocumentFile.fromTreeUri(context, Uri.parse(tree))
-    val files = directory!!.listFiles().joinToString(",") { file ->
-      "{ \"uri\": \"${file.uri}\", \"fileName\": \"${file.name}\", \"isFile\": ${file.isFile}, \"isDirectory\": ${file.isDirectory} }"
+  fun getLogs(): String {
+    var logs = "["
+    for (message in context.consoleMessages) {
+      logs += "${message},"
     }
-    return "[$files]"
-  }
-
-  @JavascriptInterface
-  fun createFileInTree(tree: String, fileName: String): String {
-    val directory = DocumentFile.fromTreeUri(context, Uri.parse(tree))
-    return directory!!.createFile("*/*", fileName)!!.uri.toString()
-  }
-
-  @JavascriptInterface
-  fun createDirectoryInTree(tree: String, fileName: String): String {
-    val directory = DocumentFile.fromTreeUri(context, Uri.parse(tree))
-    return directory!!.createDirectory(fileName)!!.uri.toString()
-  }
-
-  @JavascriptInterface
-  fun deleteFileInTree(fileUri: String): Boolean {
-    val file = DocumentFile.fromTreeUri(context, Uri.parse(fileUri))
-    return file!!.delete()
-  }
-
-  /**
-   * hides the splashscreen
-   */
-  @JavascriptInterface
-  fun hideSplashScreen() {
-    context.showSplashScreen = false
+    // get rid of trailing comma
+    logs = logs.substring(0, logs.length - 1)
+    logs += "]"
+    return logs
   }
 
   @JavascriptInterface
@@ -587,9 +596,12 @@ class FreeTubeJavaScriptInterface {
       .setClass(context,  MainActivity::class.java))
   }
 
+  /**
+   * hides the splashscreen
+   */
   @JavascriptInterface
-  fun getSyncMessage(promise: String): String {
-    return jsCommunicator.getSyncMessage(promise)
+  fun hideSplashScreen() {
+    context.showSplashScreen = false
   }
 
   @JavascriptInterface
@@ -611,25 +623,13 @@ class FreeTubeJavaScriptInterface {
       }
     }
   }
-  private fun hexToColour(hex: String) : Int {
-    return if (hex.length === 7) {
-      Color.rgb(
-        Integer.valueOf(hex.substring(1, 3), 16),
-        Integer.valueOf(hex.substring(3, 5), 16),
-        Integer.valueOf(hex.substring(5, 7), 16)
-      )
-    } else if (hex.length === 4) {
-      val r = hex.substring(1, 2)
-      val g = hex.substring(2, 3)
-      val b = hex.substring(3, 4)
-      Color.rgb(
-        Integer.valueOf("$r$r", 16),
-        Integer.valueOf("$g$g", 16),
-        Integer.valueOf("$b$b", 16)
-      )
-    } else {
-      Color.TRANSPARENT
-    }
+
+  /**
+   * used on the JS side for async js communication
+   */
+  @JavascriptInterface
+  fun getSyncMessage(promise: String): String {
+    return jsCommunicator.getSyncMessage(promise)
   }
 
   /**
@@ -642,8 +642,8 @@ class FreeTubeJavaScriptInterface {
         WindowCompat.getInsetsController(context.window, context.window.decorView)
       windowInsetsController.isAppearanceLightNavigationBars = !navigationDarkMode
       windowInsetsController.isAppearanceLightStatusBars = !statusDarkMode
-      context.window.navigationBarColor = hexToColour(navigationHex)
-      context.window.statusBarColor = hexToColour(statusHex)
+      context.window.navigationBarColor = navigationHex.hexToColour()
+      context.window.statusBarColor = statusHex.hexToColour()
     }
   }
 
@@ -674,47 +674,57 @@ class FreeTubeJavaScriptInterface {
   }
 
   @JavascriptInterface
-  fun generatePOTokenFromVisitorData(visitorData: String): String {
-    val promise = jsCommunicator.jsPromise()
-    val bgWv = context.bgWebView
-    val script = context.readTextAsset("botGuardScript.js")
-    try {
-      val functionName = script.split("export{")[1].split(" as default};")[0]
-      val exportSection = "export{${functionName} as default};"
-      context.bgJsInterface.onReturnToken {
-        run {
-          context.runOnUiThread {
-            jsCommunicator.resolve(promise, it)
-            bgWv.loadUrl("about:blank")
-          }
-        }
-      }
-      val bakedScript =
-        script.replace(exportSection, "; ${functionName}(\"${visitorData}\").then((TOKEN_RESULT) => { console.log(`Your potoken is \${TOKEN_RESULT}`) ; Android.returnToken(TOKEN_RESULT) })")
-      context.runOnUiThread {
-        bgWv.loadDataWithBaseURL(
-          "https://www.youtube.com",
-          "<script>${bakedScript}</script>",
-          "text/html",
-          "utf-8",
-          null
-        )
-      }
-    } catch (exception: Exception) {
-      jsCommunicator.reject(promise, exception.message!!)
-    }
-    return promise
+  fun setScale(scale: Int) {
+    context.webView.setScale(scale / 100.0)
   }
 
+  // endregion
+
+  // region Data Extraction
+
+  @JavascriptInterface
+  fun generatePOTokenFromVisitorData(visitorData: String): String {
+    return Promise(context.threadPoolExecutor, {
+      resolve,
+      reject ->
+        val bgWv = context.bgWebView
+        val script = context.readTextAsset("botGuardScript.js")
+        try {
+          val functionName = script.split("export{")[1].split(" as default};")[0]
+          val exportSection = "export{${functionName} as default};"
+          context.bgJsInterface.onReturnToken {
+            run {
+              context.runOnUiThread {
+                resolve(it)
+                bgWv.loadUrl("about:blank")
+              }
+            }
+          }
+          val bakedScript =
+            script.replace(exportSection, "; ${functionName}(\"${visitorData}\").then((TOKEN_RESULT) => { console.log(`Your potoken is \${TOKEN_RESULT}`) ; Android.returnToken(TOKEN_RESULT) })")
+          context.runOnUiThread {
+            bgWv.loadDataWithBaseURL(
+              "https://www.youtube.com",
+              "<script>${bakedScript}</script>",
+              "text/html",
+              "utf-8",
+              null
+            )
+          }
+        } catch (exception: Exception) {
+          reject(exception.message!!)
+        }
+    }).addJsCommunicator(jsCommunicator)
+  }
+
+  // endregion
+
+  // region UNUSED SHOULD BE OKAY TO DELETE 🤞
   @JavascriptInterface
   fun queueFetchBody(id: String, body: String) {
     if (body != "undefined") {
       context.pendingRequestBodies[id] = body
     }
   }
-
-  @JavascriptInterface
-  fun setScale(scale: Int) {
-    context.webView.setScale(scale / 100.0)
-  }
+  // endregion
 }

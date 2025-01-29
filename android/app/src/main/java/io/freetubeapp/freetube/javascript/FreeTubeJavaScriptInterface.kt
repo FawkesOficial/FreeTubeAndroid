@@ -377,7 +377,7 @@ class FreeTubeJavaScriptInterface {
    */
   @JavascriptInterface
   fun readFile(basedir: String, filename: String): String {
-    val promise = Promise(context.threadPoolExecutor, {
+    return Promise(context.threadPoolExecutor, {
       resolve,
       reject ->
       try {
@@ -394,8 +394,7 @@ class FreeTubeJavaScriptInterface {
       } catch (ex: Exception) {
         reject(ex.stackTraceToString())
       }
-    })
-    return promise.addJsCommunicator(jsCommunicator)
+    }).addJsCommunicator(jsCommunicator)
   }
 
   /**
@@ -403,8 +402,9 @@ class FreeTubeJavaScriptInterface {
    */
   @JavascriptInterface
   fun writeFile(basedir: String, filename: String, content: String): String {
-    val promise = jsCommunicator.jsPromise()
-    context.threadPoolExecutor.execute {
+    return Promise(context.threadPoolExecutor, {
+      resolve,
+      reject ->
       try {
         if (basedir.startsWith("content://")) {
           // urls created by save dialog
@@ -412,7 +412,7 @@ class FreeTubeJavaScriptInterface {
           stream!!.write(content.toByteArray())
           stream!!.flush()
           stream!!.close()
-          jsCommunicator.resolve(promise, "true")
+          resolve("true")
         } else {
           val path = getDirectory(basedir)
           var file = File(path, filename)
@@ -420,13 +420,12 @@ class FreeTubeJavaScriptInterface {
             file.createNewFile()
           }
           file.writeText(content)
-          jsCommunicator.resolve(promise, "true")
+          resolve("true")
         }
       } catch (ex: Exception) {
-        jsCommunicator.reject(promise, ex.stackTraceToString())
+        reject(ex.stackTraceToString())
       }
-    }
-    return promise
+    }).addJsCommunicator(jsCommunicator)
   }
 
   /**

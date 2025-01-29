@@ -515,26 +515,28 @@ class FreeTubeJavaScriptInterface {
 
   @JavascriptInterface
   fun requestDirectoryAccessDialog(): String {
-    val promise = jsCommunicator.jsPromise()
-    val openDialogIntent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)
-    context.listenForActivityResults {
-        result: ActivityResult? ->
-      if (result!!.resultCode == Activity.RESULT_CANCELED) {
-        jsCommunicator.resolve(promise, "USER_CANCELED")
+    return Promise(context.threadPoolExecutor, {
+      resolve,
+      reject ->
+      val openDialogIntent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)
+      context.listenForActivityResults {
+          result: ActivityResult? ->
+          if (result!!.resultCode == Activity.RESULT_CANCELED) {
+            resolve("USER_CANCELED")
+          }
+          try {
+            val uri = result.data!!.data!!
+            context.contentResolver.takePersistableUriPermission(
+              uri,
+              Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+            )
+            resolve(uri)
+          } catch (ex: Exception) {
+            reject(ex.toString())
+          }
       }
-      try {
-        val uri = result!!.data!!.data!!
-        context.contentResolver.takePersistableUriPermission(
-          uri,
-          Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-        )
-        jsCommunicator.resolve(promise, uri.toString())
-      } catch (ex: Exception) {
-        jsCommunicator.reject(promise, ex.toString())
-      }
-    }
-    context.activityResultLauncher.launch(openDialogIntent)
-    return promise
+      context.activityResultLauncher.launch(openDialogIntent)
+    }).addJsCommunicator(jsCommunicator)
   }
 
   @JavascriptInterface

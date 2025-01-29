@@ -326,7 +326,7 @@ class MainActivity : AppCompatActivity(), OnRequestPermissionsResultCallback {
     permissionsListeners.add(listener)
   }
 
-  fun listenForActivityResults(listener: (ActivityResult?) -> Unit) {
+  private fun listenForActivityResults(listener: (ActivityResult?) -> Unit) {
     activityResultListeners.add(listener)
   }
 

@@ -27,6 +27,8 @@ import io.freetubeapp.freetube.MainActivity
 import io.freetubeapp.freetube.MediaControlsReceiver
 import io.freetubeapp.freetube.R
 import io.freetubeapp.freetube.helpers.Promise
+import io.freetubeapp.freetube.helpers.readText
+import io.freetubeapp.freetube.helpers.writeText
 import org.json.JSONObject
 import java.io.File
 import java.io.FileInputStream
@@ -388,8 +390,7 @@ class FreeTubeJavaScriptInterface {
           resolve(content)
         } else {
           val path = getDirectory(basedir)
-          val file = File(path, filename)
-          resolve(FileInputStream(file).bufferedReader().use { it.readText() })
+          resolve(File(path, filename).readText())
         }
       } catch (ex: Exception) {
         reject(ex.stackTraceToString())
@@ -415,11 +416,7 @@ class FreeTubeJavaScriptInterface {
           resolve("true")
         } else {
           val path = getDirectory(basedir)
-          var file = File(path, filename)
-          if (!file.exists()) {
-            file.createNewFile()
-          }
-          file.writeText(content)
+          File(path, filename).writeText(content)
           resolve("true")
         }
       } catch (ex: Exception) {

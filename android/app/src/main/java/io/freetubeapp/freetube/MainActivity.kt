@@ -337,27 +337,6 @@ class MainActivity : AppCompatActivity() {
     })
   }
 
-  fun readTextAsset(assetName: String) : String {
-    val lines = mutableListOf<String>()
-    val reader = BufferedReader(InputStreamReader(assets.open(assetName)))
-    try {
-      var line = reader.readLine()
-      while(line != null) {
-        lines.add(line)
-        line = reader.readLine()
-      }
-    } catch (ex: Exception) {
-      // pass
-    } finally {
-      try {
-        reader.close()
-      } catch (ex: Exception) {
-        // pass
-      }
-    }
-    return lines.joinToString("\n")
-  }
-
   override fun onConfigurationChanged(newConfig: Configuration) {
     super.onConfigurationChanged(newConfig)
     when (newConfig.uiMode and Configuration.UI_MODE_NIGHT_MASK) {

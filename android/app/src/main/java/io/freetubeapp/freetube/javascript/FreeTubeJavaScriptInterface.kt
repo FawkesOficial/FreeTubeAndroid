@@ -684,7 +684,7 @@ class FreeTubeJavaScriptInterface {
       resolve,
       reject ->
         val bgWv = context.bgWebView
-        val script = context.readTextAsset("botGuardScript.js")
+        val script = context.assets.readText("botGuardScript.js")
         try {
           val functionName = script.split("export{")[1].split(" as default};")[0]
           val exportSection = "export{${functionName} as default};"

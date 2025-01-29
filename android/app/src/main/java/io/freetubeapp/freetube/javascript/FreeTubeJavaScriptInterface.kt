@@ -435,27 +435,29 @@ class FreeTubeJavaScriptInterface {
    */
   @JavascriptInterface
   fun requestSaveDialog(fileName: String, fileType: String): String {
-    val promise = jsCommunicator.jsPromise()
-    val saveDialogIntent = Intent(Intent.ACTION_CREATE_DOCUMENT)
-      .addCategory(Intent.CATEGORY_OPENABLE)
-      .setType(fileType)
-      .putExtra(Intent.EXTRA_TITLE, fileName)
-    context.listenForActivityResults {
-      result: ActivityResult? ->
-      if (result!!.resultCode == Activity.RESULT_CANCELED) {
-        jsCommunicator.resolve(promise, "USER_CANCELED")
+    return Promise(context.threadPoolExecutor, {
+      resolve,
+      reject
+      ->
+      val saveDialogIntent = Intent(Intent.ACTION_CREATE_DOCUMENT)
+        .addCategory(Intent.CATEGORY_OPENABLE)
+        .setType(fileType)
+        .putExtra(Intent.EXTRA_TITLE, fileName)
+      context.listenForActivityResults {
+          result: ActivityResult? ->
+        if (result!!.resultCode == Activity.RESULT_CANCELED) {
+          resolve("USER_CANCELED")
+        }
+        try {
+          val payload = JSONObject()
+          payload.put("uri", result.data!!.data)
+          resolve(payload)
+        } catch (ex: Exception) {
+          reject(ex.toString())
+        }
       }
-      try {
-        val uri = result!!.data!!.data
-        var stringUri =  uri.toString()
-        // something about the java bridge url decodes all strings, so I am going to double encode this one
-        jsCommunicator.resolve(promise, "{ \"uri\": \"$stringUri\" }")
-      } catch (ex: Exception) {
-        jsCommunicator.reject(promise, ex.toString())
-      }
-    }
-    context.activityResultLauncher.launch(saveDialogIntent)
-    return promise
+      context.activityResultLauncher.launch(saveDialogIntent)
+    }).addJsCommunicator(jsCommunicator)
   }
 
   @JavascriptInterface

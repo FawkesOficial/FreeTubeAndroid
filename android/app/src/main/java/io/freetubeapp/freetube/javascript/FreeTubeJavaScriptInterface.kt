@@ -494,24 +494,23 @@ class FreeTubeJavaScriptInterface {
       resolve,
       reject
       ->
-      val saveDialogIntent = Intent(Intent.ACTION_CREATE_DOCUMENT)
+      context.launchIntent(
+        Intent(Intent.ACTION_CREATE_DOCUMENT)
         .addCategory(Intent.CATEGORY_OPENABLE)
         .setType(fileType)
         .putExtra(Intent.EXTRA_TITLE, fileName)
-      context.listenForActivityResults {
-          result: ActivityResult? ->
-        if (result!!.resultCode == Activity.RESULT_CANCELED) {
-          resolve("USER_CANCELED")
+      ).then {
+          if (it!!.resultCode == Activity.RESULT_CANCELED) {
+            resolve("USER_CANCELED")
+          }
+          try {
+            val payload = JSONObject()
+            payload.put("uri", it.data!!.data)
+            resolve(payload)
+          } catch (ex: Exception) {
+            reject(ex.toString())
+          }
         }
-        try {
-          val payload = JSONObject()
-          payload.put("uri", result.data!!.data)
-          resolve(payload)
-        } catch (ex: Exception) {
-          reject(ex.toString())
-        }
-      }
-      context.activityResultLauncher.launch(saveDialogIntent)
     }).addJsCommunicator(jsCommunicator)
   }
 
@@ -520,29 +519,27 @@ class FreeTubeJavaScriptInterface {
     return Promise(context.threadPoolExecutor, {
       resolve,
       reject ->
-        val openDialogIntent = Intent(Intent.ACTION_GET_CONTENT)
+        context.launchIntent(
+          Intent(Intent.ACTION_GET_CONTENT)
           .setType("*/*")
           .putExtra(Intent.EXTRA_MIME_TYPES, fileTypes.split(",").toTypedArray())
-
-        context.listenForActivityResults {
-          result: ActivityResult? ->
-          if (result!!.resultCode == Activity.RESULT_CANCELED) {
-            resolve("USER_CANCELED")
+        ).then {
+            if (it!!.resultCode == Activity.RESULT_CANCELED) {
+              resolve("USER_CANCELED")
+            }
+            try {
+              val uri = it.data!!.data
+              val mimeType = context.contentResolver.getType(uri!!)
+              val fileName = getFileNameFromUri(uri.toString())
+              val payload = JSONObject()
+              payload.put("uri", uri)
+              payload.put("type", mimeType)
+              payload.put("fileName", fileName)
+              resolve(payload)
+            } catch (ex: Exception) {
+              reject(ex.toString())
+            }
           }
-          try {
-            val uri = result.data!!.data
-            val mimeType = context.contentResolver.getType(uri!!)
-            val fileName = getFileNameFromUri(uri.toString())
-            val payload = JSONObject()
-            payload.put("uri", uri)
-            payload.put("type", mimeType)
-            payload.put("fileName", fileName)
-            resolve(payload)
-          } catch (ex: Exception) {
-            reject(ex.toString())
-          }
-        }
-        context.activityResultLauncher.launch(openDialogIntent)
     }).addJsCommunicator(jsCommunicator)
   }
 
@@ -551,14 +548,14 @@ class FreeTubeJavaScriptInterface {
     return Promise(context.threadPoolExecutor, {
       resolve,
       reject ->
-      val openDialogIntent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)
-      context.listenForActivityResults {
-          result: ActivityResult? ->
-          if (result!!.resultCode == Activity.RESULT_CANCELED) {
+      context.launchIntent(
+        Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)
+      ).then {
+          if (it!!.resultCode == Activity.RESULT_CANCELED) {
             resolve("USER_CANCELED")
           }
           try {
-            val uri = result.data!!.data!!
+            val uri = it.data!!.data!!
             context.contentResolver.takePersistableUriPermission(
               uri,
               Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
@@ -567,8 +564,7 @@ class FreeTubeJavaScriptInterface {
           } catch (ex: Exception) {
             reject(ex.toString())
           }
-      }
-      context.activityResultLauncher.launch(openDialogIntent)
+        }
     }).addJsCommunicator(jsCommunicator)
   }
 

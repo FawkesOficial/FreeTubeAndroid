@@ -1,6 +1,7 @@
 package io.freetubeapp.freetube
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.Intent
 import android.content.res.Configuration
 import android.graphics.Color
@@ -25,6 +26,7 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import io.freetubeapp.freetube.databinding.ActivityMainBinding
+import io.freetubeapp.freetube.helpers.Promise
 import io.freetubeapp.freetube.javascript.BotGuardJavascriptInterface
 import io.freetubeapp.freetube.javascript.FreeTubeJavaScriptInterface
 import io.freetubeapp.freetube.javascript.dispatchEvent
@@ -326,6 +328,21 @@ class MainActivity : AppCompatActivity(), OnRequestPermissionsResultCallback {
 
   fun listenForActivityResults(listener: (ActivityResult?) -> Unit) {
     activityResultListeners.add(listener)
+  }
+
+  fun launchIntent(intent: Intent): Promise<ActivityResult?, Exception> {
+    return Promise(threadPoolExecutor, {
+      resolve,
+      reject ->
+      try {
+        listenForActivityResults {
+          resolve(it)
+        }
+        activityResultLauncher.launch(intent)
+      } catch (exception: Exception) {
+        reject(exception)
+      }
+    })
   }
 
   // region webview methods

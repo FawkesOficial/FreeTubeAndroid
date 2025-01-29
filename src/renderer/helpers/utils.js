@@ -262,11 +262,25 @@ export async function readFileWithPicker(
 ) {
   let file
 
+  if (process.env.IS_ANDROID) {
+    const extensions = []
+    const values = Object.values(acceptedTypes)
+    for (const value of values) {
+      if (Array.isArray(value)) {
+        extensions.push(...value.map(extension => extension.substring(1)))
+      } else {
+        extensions.push(value.substring(1))
+      }
+    }
+    const dialogResponse = await requestOpenDialog(extensions)
+    if (!dialogResponse.canceled) {
+      file = dialogResponse
+    }
   // Only supported in Electron and desktop Chromium browsers
   // https://developer.mozilla.org/en-US/docs/Web/API/Window/showOpenFilePicker#browser_compatibility
   // As we know it is supported in Electron, adding the build flag means we can skip the runtime check in Electron
   // and allow terser to remove the unused else block
-  if (process.env.IS_ELECTRON || 'showOpenFilePicker' in window) {
+  } else if (process.env.IS_ELECTRON || 'showOpenFilePicker' in window) {
     try {
       /** @type {FileSystemFileHandle[]} */
       const [handle] = await window.showOpenFilePicker({
@@ -288,20 +302,6 @@ export async function readFileWithPicker(
       }
 
       throw error
-    }
-  } else if (process.env.IS_ANDROID) {
-    const extensions = []
-    const values = Object.values(acceptedTypes)
-    for (const value of values) {
-      if (Array.isArray(value)) {
-        extensions.push(...value.map(extension => extension.substring(1)))
-      } else {
-        extensions.push(value.substring(1))
-      }
-    }
-    const dialogResponse = await requestOpenDialog(extensions)
-    if (!dialogResponse.canceled) {
-      file = dialogResponse
     }
   } else {
     /** @type {File|null} */
@@ -364,11 +364,18 @@ export async function writeFileWithPicker(
   rememberDirectoryId,
   startInDirectory
 ) {
+  if (process.env.IS_ANDROID) {
+    const response = await requestSaveDialog(fileName, 'application/octet-stream')
+    if (!response.canceled) {
+      await writeFile(response.uri, content)
+      return true
+    }
+    return false
   // Only supported in Electron and desktop Chromium browsers
   // https://developer.mozilla.org/en-US/docs/Web/API/Window/showOpenFilePicker#browser_compatibility
   // As we know it is supported in Electron, adding the build flag means we can skip the runtime check in Electron
   // and allow terser to remove the unused else block
-  if (process.env.IS_ELECTRON || 'showSaveFilePicker' in window) {
+  } else if (process.env.IS_ELECTRON || 'showSaveFilePicker' in window) {
     let writableFileStream
 
     try {
@@ -403,13 +410,6 @@ export async function writeFileWithPicker(
     }
 
     return true
-  } else if (process.env.IS_ANDROID) {
-    const response = await requestSaveDialog(fileName, 'application/octet-stream')
-    if (!response.canceled) {
-      await writeFile(response.uri, content)
-      return true
-    }
-    return false
   } else {
     if (typeof content === 'string') {
       content = new Blob([content], { type: mimeType })

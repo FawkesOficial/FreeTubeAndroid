@@ -27,13 +27,16 @@ import io.freetubeapp.freetube.MainActivity
 import io.freetubeapp.freetube.MediaControlsReceiver
 import io.freetubeapp.freetube.R
 import io.freetubeapp.freetube.helpers.Promise
+import io.freetubeapp.freetube.helpers.readBytes
 import io.freetubeapp.freetube.helpers.readText
+import io.freetubeapp.freetube.helpers.writeBytes
 import io.freetubeapp.freetube.helpers.writeText
 import org.json.JSONObject
 import java.io.File
 import java.io.FileInputStream
 import java.net.URL
 import java.net.URLDecoder
+import java.nio.charset.Charset
 import java.util.UUID.*
 
 
@@ -384,10 +387,11 @@ class FreeTubeJavaScriptInterface {
       reject ->
       try {
         if (basedir.startsWith("content://")) {
-          val stream = context.contentResolver.openInputStream(Uri.parse(basedir))
-          val content = String(stream!!.readBytes())
-          stream!!.close()
-          resolve(content)
+          resolve(
+            context.contentResolver
+            .readBytes(Uri.parse(basedir))
+            .toString(Charset.forName("utf-8"))
+          )
         } else {
           val path = getDirectory(basedir)
           resolve(File(path, filename).readText())
@@ -409,10 +413,10 @@ class FreeTubeJavaScriptInterface {
       try {
         if (basedir.startsWith("content://")) {
           // urls created by save dialog
-          val stream = context.contentResolver.openOutputStream(Uri.parse(basedir), "wt")
-          stream!!.write(content.toByteArray())
-          stream!!.flush()
-          stream!!.close()
+          context.contentResolver.writeBytes(
+            Uri.parse(basedir),
+            content.toByteArray()
+          )
           resolve("true")
         } else {
           val path = getDirectory(basedir)

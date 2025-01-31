@@ -64,6 +64,7 @@
     display: flex;
     flex-wrap: wrap;
     justify-content:stretch;
+    max-inline-size:  calc(100% - 38px);
   }
   h3 {
     flex-grow: 1;

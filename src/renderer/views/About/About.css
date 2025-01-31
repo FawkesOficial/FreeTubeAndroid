@@ -55,9 +55,21 @@
   grid-area: content;
 }
 
-@media only screen and (width <=650px) {
+
+@media only screen and (width <=940px) {
   .about-chunks {
-    grid-template-columns: 1fr;
+    grid-template-columns: none;
+  }
+  .chunk {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content:stretch;
+  }
+  h3 {
+    flex-grow: 1;
+  }
+  .content {
+    margin-top: 1px;
   }
 }
 

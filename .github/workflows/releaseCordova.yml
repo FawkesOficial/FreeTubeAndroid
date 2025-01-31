@@ -87,7 +87,7 @@ jobs:
         docker push ghcr.io/marmadilemanteater/freetubecordova:latest
 
     - name: 📡 Upload PWA Artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4.6.0
       with:
         name: freetube-${{ steps.versionNumber.outputs.result }}-PWA
         path: dist/web
@@ -143,7 +143,7 @@ jobs:
         cp android/app/build/outputs/apk/release/app-release.apk dist/freetube-${{ steps.versionNumber.outputs.result }}-Android.apk
 
     - name: 📡 Upload APK Artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4.6.0
       with:
         name: freetube-${{ steps.versionNumber.outputs.result }}-Android.apk
         path: dist/freetube-${{ steps.versionNumber.outputs.result }}-Android.apk

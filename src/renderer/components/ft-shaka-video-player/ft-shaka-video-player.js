@@ -650,6 +650,7 @@ export default defineComponent({
       const periods = mpdNode.children?.filter(child => typeof child !== 'string' && child.tagName === 'Period') ?? []
 
       sortAdapationSetsByCodec(periods)
+      sortAudioAdaptationSetsByBitrate(periods)
 
       if (mpdNode.attributes.type === 'dynamic') {
         // fix live stream loading issues
@@ -752,6 +753,34 @@ export default defineComponent({
             const codecsPrefixB = getCodecsPrefix(b)
 
             return codecPriorities.indexOf(codecsPrefixA) - codecPriorities.indexOf(codecsPrefixB)
+          })
+      }
+    }
+
+    /**
+     * Sort audio AdaptationSets so that streams with higher bitrates come first.
+     * Workaround that makes the player select high-quality audio.
+     * @param {shaka.extern.xml.Node[]} periods
+     */
+    function sortAudioAdaptationSetsByBitrate(periods) {
+      for (const period of periods) {
+        period.children
+          ?.filter(child => typeof child !== 'string' && child.tagName === 'AdaptationSet' &&
+            (child.attributes.contentType === 'audio' || child.attributes.mimeType.startsWith('audio/')))
+          .forEach(adaptationSet => {
+            adaptationSet.children.sort((a, b) => {
+              if (a.tagName === 'AudioChannelConfiguration' && b.tagName !== 'AudioChannelConfiguration') {
+                // Push AudioChannelConfiguration to the front (where it seems to already be) so that it doesn't
+                // block sorting Representations if it's in the middle instead
+                return -1
+              } else if (b.tagName === 'AudioChannelConfiguration' && a.tagName !== 'AudioChannelConfiguration') {
+                return 1
+              } else if (a.tagName === 'Representation' && b.tagName === 'Representation') {
+                return b.attributes.bandwidth - a.attributes.bandwidth
+              } else {
+                return 0
+              }
+            })
           })
       }
     }
@@ -1617,7 +1646,7 @@ export default defineComponent({
       const filenameWithExtension = `${filename}.${format}`
 
       const wasPlaying = !video_.paused
-      if (wasPlaying) {
+      if ((!process.env.IS_ELECTRON || screenshotAskPath.value) && wasPlaying) {
         video_.pause()
       }
 
@@ -1654,7 +1683,7 @@ export default defineComponent({
       } finally {
         canvas.remove()
 
-        if (wasPlaying) {
+        if ((!process.env.IS_ELECTRON || screenshotAskPath.value) && wasPlaying) {
           video_.play()
         }
       }

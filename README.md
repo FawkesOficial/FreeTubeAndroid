@@ -127,12 +127,12 @@ If you'd like to localize FreeTube Android, please send submissions to [FreeTube
 ## Contact
 If you ever have any questions, feel free to make an issue here on GitHub. 
 
-## Upstream Donations
-If you enjoy using FreeTube Android, you're welcome to leave a donation using the following methods to support upstream development and maintenance.  
+## Donations
+If you enjoy using FreeTube Android, you're welcome to leave a donation using the following methods to support development and maintenance.  
+* [Liberapay](https://liberapay.com/MarmadileManteater) _(goes to creator of FreeTubeAndroid)_
+* Bitcoin Address: `1Lih7Ho5gnxb1CwPD4o59ss78pwo2T91eS` _(goes to upstream maintainers)_
 
-* Bitcoin Address: `1Lih7Ho5gnxb1CwPD4o59ss78pwo2T91eS`
-
-While your donations are much appreciated, only donate if you really want to.  Donations are used for keeping the website up and running and eventual code signing costs.
+While your donations are much appreciated, only donate if you really want to. Donations are no strings attached and do not come with the expectation of having your requests fulfilled.
 
 ## License
 [![GNU AGPLv3 Image](https://www.gnu.org/graphics/agplv3-155x51.png)](https://www.gnu.org/licenses/agpl-3.0.html)  

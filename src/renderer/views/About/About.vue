@@ -105,8 +105,13 @@ const chunks = computed(() => [
     content: `${t('About.FreeTube is made possible by')} <a href="https://docs.freetubeapp.io/credits/">${t('About.these people and projects')}</a>`
   },
   {
+    icon: ['fas', 'money-check-dollar'],
+    title: `${t('About.Donate')}`,
+    content: `<a href="https://liberapay.com/MarmadileManteater/">Liberapay</a>`
+  },
+  {
     icon: ['fab', 'bitcoin'],
-    title: `${t('About.Donate')} - BTC`,
+    title: `${t('About FTA.Donate Upstream')} - BTC`,
     content: `<a href="bitcoin:${ABOUT_BITCOIN_ADDRESS}">${ABOUT_BITCOIN_ADDRESS}</a>`
   }
 ])

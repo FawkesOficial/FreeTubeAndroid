@@ -187,6 +187,7 @@ const state = {
   hideChannelPlaylists: false,
   hideChannelReleases: false,
   hideChannelPodcasts: false,
+  hideChannelCourses: false,
   hideChannelShorts: false,
   hideChannelSubscriptions: false,
   hideCommentLikes: false,

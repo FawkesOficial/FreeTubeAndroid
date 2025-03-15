@@ -57,6 +57,12 @@
 
 
 @media only screen and (width <=940px) {
+  .headingIcon {
+    color: var(--primary-color);
+  }
+}
+
+@media only screen and (width <=650px) {
   .about-chunks {
     grid-template-columns: none;
   }

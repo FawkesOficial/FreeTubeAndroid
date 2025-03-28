@@ -39,6 +39,7 @@
   margin: 0;
   padding: 18px;
   word-wrap: break-word;
+  overflow-wrap: anywhere;
 }
 
 .icon {
@@ -55,28 +56,13 @@
   grid-area: content;
 }
 
-
-@media only screen and (width <=940px) {
-  .headingIcon {
-    color: var(--primary-color);
-  }
+.headingIcon {
+  color: var(--primary-color);
 }
 
 @media only screen and (width <=650px) {
   .about-chunks {
-    grid-template-columns: none;
-  }
-  .chunk {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content:stretch;
-    max-inline-size:  calc(100% - 38px);
-  }
-  h3 {
-    flex-grow: 1;
-  }
-  .content {
-    margin-top: 1px;
+    grid-template-columns: 1fr;
   }
 }
 

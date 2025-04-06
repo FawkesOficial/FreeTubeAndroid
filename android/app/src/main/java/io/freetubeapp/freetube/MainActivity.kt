@@ -1,7 +1,6 @@
 package io.freetubeapp.freetube
 
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.content.Intent
 import android.content.res.Configuration
 import android.graphics.Color
@@ -12,7 +11,6 @@ import android.view.ViewTreeObserver
 import android.webkit.ConsoleMessage
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
-import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.FrameLayout
@@ -21,7 +19,6 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat.OnRequestPermissionsResultCallback
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
@@ -33,10 +30,6 @@ import io.freetubeapp.freetube.javascript.dispatchEvent
 import io.freetubeapp.freetube.webviews.BackgroundPlayWebView
 import io.freetubeapp.freetube.webviews.BotGuardWebView
 import org.json.JSONObject
-import java.io.BufferedReader
-import java.io.InputStreamReader
-import java.net.HttpURLConnection
-import java.net.URL
 import java.net.URLEncoder
 import java.util.UUID
 import java.util.concurrent.BlockingQueue
@@ -201,7 +194,7 @@ class MainActivity : AppCompatActivity() {
         messageData.put("lineNumber", consoleMessage.lineNumber())
         consoleMessages.add(messageData)
         webView.dispatchEvent("console-message", "data", messageData)
-        return super.onConsoleMessage(consoleMessage);
+        return super.onConsoleMessage(consoleMessage)
       }
 
       override fun onShowCustomView(view: View?, callback: CustomViewCallback?) {
@@ -231,12 +224,12 @@ class MainActivity : AppCompatActivity() {
         }
         val regex = """^https?:\/\/((www\.)?youtube\.com(\/embed)?|youtu\.be)\/.*$"""
 
-        if (Regex(regex).containsMatchIn(request!!.url!!.toString())) {
-          webView.dispatchEvent("youtube-link", "link", request!!.url!!.toString())
+        if (Regex(regex).containsMatchIn(request.url!!.toString())) {
+          webView.dispatchEvent("youtube-link", "link", request.url!!.toString())
           return true
         }
         // send all requests to a real web browser
-        val intent = Intent(Intent.ACTION_VIEW, request!!.url)
+        val intent = Intent(Intent.ACTION_VIEW, request.url)
         this@MainActivity.startActivity(intent)
         return true
       }
@@ -273,7 +266,7 @@ class MainActivity : AppCompatActivity() {
         messageData.put("lineNumber", consoleMessage.lineNumber())
         consoleMessages.add(messageData)
         webView.dispatchEvent("console-message", "data", messageData)
-        return super.onConsoleMessage(consoleMessage);
+        return super.onConsoleMessage(consoleMessage)
       }
     }
   }
@@ -300,7 +293,7 @@ class MainActivity : AppCompatActivity() {
     if (intent!!.data !== null) {
       val uri = intent!!.data
       val isYT =
-        uri!!.host!! == "www.youtube.com" || uri!!.host!! == "youtube.com" || uri!!.host!! == "m.youtube.com" || uri!!.host!! == "youtu.be"
+        uri!!.host!! == "www.youtube.com" || uri.host!! == "youtube.com" || uri.host!! == "m.youtube.com" || uri.host!! == "youtu.be"
       val url = if (!isYT) {
         uri.toString().replace(uri.host.toString(), "www.youtube.com")
       } else {

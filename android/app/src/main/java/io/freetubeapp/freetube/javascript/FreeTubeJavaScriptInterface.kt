@@ -8,7 +8,6 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Intent
 import android.graphics.BitmapFactory
-import android.graphics.Color
 import android.media.MediaMetadata
 import android.media.session.MediaSession
 import android.media.session.PlaybackState
@@ -18,7 +17,6 @@ import android.os.Build
 import android.provider.OpenableColumns
 import android.view.WindowManager
 import android.webkit.JavascriptInterface
-import androidx.activity.result.ActivityResult
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.view.WindowCompat
@@ -34,15 +32,13 @@ import io.freetubeapp.freetube.helpers.writeBytes
 import io.freetubeapp.freetube.helpers.writeText
 import org.json.JSONObject
 import java.io.File
-import java.io.FileInputStream
 import java.net.URL
-import java.net.URLDecoder
 import java.nio.charset.Charset
 import java.util.UUID.*
 
 
-class FreeTubeJavaScriptInterface {
-  private var context: MainActivity
+class FreeTubeJavaScriptInterface(main: MainActivity) {
+  private var context: MainActivity = main
   private var mediaSession: MediaSession?
   private var lastPosition: Long
   private var lastState: Int
@@ -57,8 +53,7 @@ class FreeTubeJavaScriptInterface {
     private val NOTIFICATION_TAG = String.format("%s", randomUUID())
   }
 
-  constructor(main: MainActivity)  {
-    context = main
+  init {
     mediaSession = null
     lastPosition = 0
     lastState = PlaybackState.STATE_PLAYING
@@ -74,7 +69,7 @@ class FreeTubeJavaScriptInterface {
   private fun getActions(state: Int = lastState): Array<Notification.Action> {
     var neutralAction = arrayOf("Pause", "pause")
     var neutralIcon = androidx.media3.ui.R.drawable.exo_icon_pause
-    if (state == PlaybackState.STATE_PAUSED) {
+    if (state == STATE_PAUSED) {
       neutralAction = arrayOf("Play", "play")
       neutralIcon = androidx.media3.ui.R.drawable.exo_icon_play
     }
@@ -101,11 +96,11 @@ class FreeTubeJavaScriptInterface {
    * retrieves the media style for the media controls notification
    */
   private fun getMediaStyle(): Notification.MediaStyle? {
-    if (mediaSession != null) {
-      return Notification.MediaStyle()
+    return if (mediaSession != null) {
+      Notification.MediaStyle()
         .setMediaSession(mediaSession!!.sessionToken).setShowActionsInCompactView(0, 1, 2)
     } else {
-      return null
+      null
     }
   }
 
@@ -182,18 +177,13 @@ class FreeTubeJavaScriptInterface {
     if (state != lastState) {
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
         // need to reissue a notification if we want to update the actions
-        var actions = getActions(state)
+        val actions = getActions(state)
         val notification = getMediaControlsNotification(actions)
         pushNotification(notification!!)
       }
     }
     lastState = state
-    var statePosition: Long
-    if (position == null) {
-      statePosition = lastPosition
-    } else {
-      statePosition = position
-    }
+    val statePosition: Long = position ?: lastPosition
     session.setPlaybackState(
       PlaybackState.Builder()
         .setState(state, statePosition, 0.0f)
@@ -265,7 +255,7 @@ class FreeTubeJavaScriptInterface {
       ?: NotificationChannel(CHANNEL_ID, "Media Controls", NotificationManager.IMPORTANCE_MIN)
 
     channel.lockscreenVisibility = Notification.VISIBILITY_PRIVATE
-    var session: MediaSession
+    val session: MediaSession
 
     // don't create multiple sessions or multiple channels
     if (mediaSession == null) {
@@ -324,10 +314,9 @@ class FreeTubeJavaScriptInterface {
     var givenState = state?.toInt()
     if (state == null) {
       givenState = lastState
-    } else {
     }
     if (position != null) {
-      lastPosition = position.toLong()!!
+      lastPosition = position.toLong()
     }
     setState(mediaSession!!, givenState!!, position?.toLong())
   }
@@ -645,10 +634,10 @@ class FreeTubeJavaScriptInterface {
 
   @JavascriptInterface
   fun getSystemTheme(): String {
-    if (context.darkMode) {
-      return "dark"
+    return if (context.darkMode) {
+      "dark"
     } else {
-      return "light"
+      "light"
     }
   }
 
@@ -745,13 +734,4 @@ class FreeTubeJavaScriptInterface {
   }
 
   // endregion
-
-  /**
-  @JavascriptInterface
-  fun queueFetchBody(id: String, body: String) {
-    if (body != "undefined") {
-      context.pendingRequestBodies[id] = body
-    }
-  }
-  */
 }

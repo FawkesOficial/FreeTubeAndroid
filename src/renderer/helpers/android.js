@@ -361,7 +361,6 @@ export function generatePOTokenFromVisitorData(visitorData) {
 export async function generatePOTokens(videoId, visitorData, sessionContext) {
   const id = android.generatePOTokens(videoId, visitorData, sessionContext)
   const data = JSON.parse(await awaitAsyncResult(id))
-  console.log(data)
   return data
 }
 

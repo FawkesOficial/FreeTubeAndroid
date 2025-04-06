@@ -7,7 +7,6 @@ import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import io.freetubeapp.freetube.MainActivity
-import io.freetubeapp.freetube.javascript.BotGuardJavascriptInterface
 import io.freetubeapp.freetube.javascript.consoleLog
 import java.net.HttpURLConnection
 import java.net.URL
@@ -24,14 +23,14 @@ class BotGuardWebView @JvmOverloads constructor(
           view: WebView?,
           request: WebResourceRequest?
         ): WebResourceResponse? {
-          if (request!!.url.toString().startsWith("data:text/html") || request!!.url.toString().startsWith("https://www.youtube.com/api/jnn/v1/GenerateIT")) {
+          if (request!!.url.toString().startsWith("data:text/html") || request.url.toString().startsWith("https://www.youtube.com/api/jnn/v1/GenerateIT")) {
             return super.shouldInterceptRequest(view, request)
           }
           val jsInterface = mainActivity.bgJsInterface
-          with(URL(request!!.url.toString()).openConnection() as HttpURLConnection) {
+          with(URL(request.url.toString()).openConnection() as HttpURLConnection) {
             requestMethod = request.method
             // map headers
-            for (header in request!!.requestHeaders) {
+            for (header in request.requestHeaders) {
               setRequestProperty(header.key, header.value)
             }
 
@@ -58,7 +57,7 @@ class BotGuardWebView @JvmOverloads constructor(
             }
             try {
               // 🧝‍♀️ magic
-              return WebResourceResponse(this.contentType, this.contentEncoding, inputStream!!);
+              return WebResourceResponse(this.contentType, this.contentEncoding, inputStream!!)
             } catch (ex: Exception) {
               consoleLog(ex.message!!, "error")
               return super.shouldInterceptRequest(view, request)

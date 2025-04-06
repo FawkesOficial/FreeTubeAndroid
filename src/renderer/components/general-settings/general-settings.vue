@@ -40,6 +40,7 @@
           @change="updateEnableSearchSuggestions"
         />
         <ft-toggle-switch
+          v-if="usingElectron"
           :label="$t('Settings.General Settings.Open Deep Links In New Window')"
           :default-value="openDeepLinksInNewWindow"
           :compact="true"

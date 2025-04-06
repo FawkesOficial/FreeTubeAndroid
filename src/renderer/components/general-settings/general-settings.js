@@ -57,7 +57,8 @@ export default defineComponent({
         'history',
         'settings'
       ],
-      usingBrowser: !process.env.IS_ELECTRON && !process.env.IS_ANDROID
+      usingBrowser: !process.env.IS_ELECTRON && !process.env.IS_ANDROID,
+      usingElectron: process.env.IS_ELECTRON
     }
   },
   computed: {

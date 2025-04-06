@@ -35,6 +35,8 @@ import java.io.File
 import java.net.URL
 import java.nio.charset.Charset
 import java.util.UUID.*
+import kotlin.io.encoding.Base64
+import kotlin.io.encoding.ExperimentalEncodingApi
 
 
 class FreeTubeJavaScriptInterface(main: MainActivity) {
@@ -447,6 +449,7 @@ class FreeTubeJavaScriptInterface(main: MainActivity) {
   /**
    * writes a file to storage
    */
+  @OptIn(ExperimentalEncodingApi::class)
   @JavascriptInterface
   fun writeFile(basedir: String, filename: String, content: String): String {
     return Promise(context.threadPoolExecutor, {
@@ -454,11 +457,21 @@ class FreeTubeJavaScriptInterface(main: MainActivity) {
       reject ->
       try {
         if (basedir.startsWith("content://")) {
-          // urls created by save dialog
-          context.contentResolver.writeBytes(
-            Uri.parse(basedir),
-            content.toByteArray()
-          )
+          // base64 uri
+          if (content.startsWith("data:")) {
+            val bytes = Base64.decode(content.split("base64,")[1])
+            // urls created by save dialog
+            context.contentResolver.writeBytes(
+              Uri.parse(basedir),
+              bytes
+            )
+          } else {
+            // urls created by save dialog
+            context.contentResolver.writeBytes(
+              Uri.parse(basedir),
+              content.toByteArray()
+            )
+          }
           resolve("true")
         } else {
           val path = getDirectory(basedir)

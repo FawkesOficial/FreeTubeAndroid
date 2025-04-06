@@ -122,6 +122,15 @@ export function requestOpenDialog(fileTypes) {
   return handleDialogResponse(promiseId)
 }
 
+async function blobToBase64(blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onloadend = () => resolve(reader.result)
+    reader.onerror = () => reject(reader.error)
+    reader.readAsDataURL(blob)
+  })
+}
+
 /**
  * @param {string} arg1 base uri or path
  * @param {string} arg2 path or content
@@ -138,6 +147,10 @@ export async function writeFile(arg1, arg2, arg3 = undefined) {
     baseUri = arg1
     path = arg2
     content = arg3
+  }
+  if (content instanceof Blob) {
+    console.log("We have a blob")
+    content = await blobToBase64(content)
   }
   try {
     await awaitAsyncResult(android.writeFile(baseUri, path, content))

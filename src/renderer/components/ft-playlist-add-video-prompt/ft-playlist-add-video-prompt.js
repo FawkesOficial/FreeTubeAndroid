@@ -211,7 +211,13 @@ export default defineComponent({
       if (val > oldVal) {
         // Focus back to search input only when playlist added
         // Allow search and easier deselecting new created playlist
-        nextTick(() => !process.env.IS_ANDROID ? this.$refs.searchBar.focus() : null)
+        nextTick(() => {
+          if (!process.env.IS_ANDROID) {
+            if (this.$refs.searchBar) {
+              this.$refs.searchBar.focus()
+            }
+          }
+        })
       }
     },
 
@@ -221,7 +227,11 @@ export default defineComponent({
       // Only care when CreatePlaylistPrompt hidden
       // Shift focus from button to prevent unwanted click event
       // due to enter key press in CreatePlaylistPrompt
-      nextTick(() => !process.env.IS_ANDROID ? this.$refs.searchBar.focus() : null)
+      if (!process.env.IS_ANDROID) {
+        if (this.$refs.searchBar) {
+          this.$refs.searchBar.focus()
+        }
+      }
     },
 
     addingDuplicateVideosEnabled(val) {
@@ -238,8 +248,9 @@ export default defineComponent({
     this.updateQueryDebounce = debounce(this.updateQuery, 500)
     document.addEventListener('keydown', this.keyboardShortcutHandler)
     if (!process.env.IS_ANDROID) {
-      // User might want to search first if they have many playlists
-      this.$refs.searchBar.focus()
+      if (this.$refs.searchBar) {
+        this.$refs.searchBar.focus()
+      }
     }
   },
   beforeDestroy() {

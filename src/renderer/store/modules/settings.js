@@ -309,7 +309,8 @@ const state = {
   defaultVolume: 1,
   uiScale: 100,
   uiScaleAndroid: 100,
-  useUiScale: false
+  useUiScale: false,
+  userPlaylistsSortBy: 'latest_played_first',
 }
 
 const sideEffectHandlers = {

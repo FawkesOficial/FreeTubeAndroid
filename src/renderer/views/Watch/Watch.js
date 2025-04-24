@@ -134,6 +134,7 @@ export default defineComponent({
       infoAreaSticky: true,
       blockVideoAutoplay: false,
       autoplayInterruptionTimeout: null,
+      playabilityStatus: '',
 
       onMountedRun: false,
 
@@ -466,7 +467,10 @@ export default defineComponent({
         this.isFamilyFriendly = result.basic_info.is_family_safe
 
         const recommendedVideos = result.watch_next_feed
-          ?.filter((item) => item.type === 'CompactVideo' || item.type === 'CompactMovie')
+          ?.filter((item) => {
+            return item.type === 'CompactVideo' || item.type === 'CompactMovie' ||
+              (item.type === 'LockupView' && item.content_type === 'VIDEO')
+          })
           .map(parseLocalWatchNextVideo) ?? []
 
         // place watched recommended videos last
@@ -613,6 +617,7 @@ export default defineComponent({
         this.videoChapters = chapters
 
         const playabilityStatus = result.playability_status
+        this.playabilityStatus = playabilityStatus.status
 
         // The apostrophe is intentionally that one (char code 8217), because that is the one YouTube uses
         const BOT_MESSAGE = 'Sign in to confirm you’re not a bot'
@@ -754,7 +759,9 @@ export default defineComponent({
             this.upcomingTimeLeft = null
             this.premiereDate = undefined
           }
-        } else {
+        }
+
+        if ((!this.isUpcoming && !this.isLive && !this.isPostLiveDvr) || (this.isUpcoming && this.playabilityStatus === 'OK')) {
           this.videoLengthSeconds = result.basic_info.duration
           if (result.streaming_data) {
             this.streamingDataExpiryDate = result.streaming_data.expires
@@ -1236,7 +1243,8 @@ export default defineComponent({
 
     handleVideoLoaded: function () {
       // will trigger again if you switch formats or change legacy quality
-      if (!this.videoPlayerLoaded) {
+      // Check isUpcoming to avoid marking upcoming videos as watched if the user has only watched the trailer
+      if (!this.videoPlayerLoaded && !this.isUpcoming) {
         this.videoPlayerLoaded = true
 
         if (this.rememberHistory) {

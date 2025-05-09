@@ -175,8 +175,7 @@ const config = {
       'localforage': path.resolve(__dirname, '_localforage.js')
     },
     fallback: {
-      'fs/promises': path.resolve(__dirname, '_empty.js'),
-      path: require.resolve('path-browserify'),
+      'fs/promises': path.resolve(__dirname, '_empty.js')
     },
     extensions: ['.js', '.vue']
   },

@@ -31,7 +31,7 @@ Global:
   Videos: 'סרטונים'
   Shorts: Shorts
   Live: חי
-  Community: קהילה
+  Posts: פוסטים
   Sort By: מיון לפי
 
   Counts:
@@ -309,6 +309,7 @@ Settings:
       Gruvbox Light: תיבת גרוב בהירה
       Catppuccin Frappe: Catppuccin Frappe
       Everforest Dark Hard: אוורפורסט כהה מאוד
+      Everforest Dark Medium: אוורפורסט כהה בינוני
     Main Color Theme:
       Main Color Theme: 'צבע ראשי'
       Red: 'אדום'
@@ -540,7 +541,6 @@ Settings:
       וסימני פיסוק מיותרים
     Hide Featured Channels: הסתרת ערוצים מומלצים
     Hide Channel Playlists: הסתרת לשונית „רשימות נגינה” של ערוץ
-    Hide Channel Community: הסתרת לשונית ה„קהילת” הערוץ
     Hide Channel Shorts: הסתרת לשונית ה־„Shorts” של הערוץ
     Sections:
       Watch Page: עמוד הצפייה
@@ -554,7 +554,6 @@ Settings:
     Hide Subscriptions Shorts: הסתרת Shorts של המינויים
     Hide Subscriptions Videos: הסתרת סרטוני מינוי
     Hide Profile Pictures in Comments: הסתרת תמונות הפרופיל בהערות
-    Hide Subscriptions Community: הסתרת קהילת המינויים
     Hide Videos and Playlists Containing Text Placeholder: מילה, חלק מילה או ביטוי
     Hide Channels Invalid: ID הערוץ שסופק לא תקין
     Hide Channels Disabled Message: חלק מהערוצים נחסמו באמצעות ID ולא טופלו. התכונה
@@ -757,7 +756,7 @@ Channel:
   This channel does not exist: הערוץ הזה לא קיים
   This channel is age-restricted and currently cannot be viewed in FreeTube.: הערוץ
     מוגבל לפי גיל וכרגע אי אפשר לצפות בו ב־FreeTube.
-  Community:
+  Posts:
     This channel currently does not have any posts: אין רשומות בערוץ הזה כרגע
     votes: '{votes} הצבעות'
     Reveal Answers: חשיפת התשובות
@@ -1014,8 +1013,8 @@ Tooltips:
     Proxy Videos Through Invidious: יתבצע חיבור ל־Invidious כדי להגיש סרטונים במקום
       להתחבר ישירות ל־YouTube.
     Default Video Format: קביעת התסדירים בעת ניגון סרטונים. תסדירי DASH יכולים להתנגן
-      באיכויות גבוהות יותר. התסדירים המיושנים מוגבלים ל־720 פיקסלים לכל היותר אך משתמשויםבפחות
-      רוחב פס. תסדירי שמע הם הזרמות של שמע בלבד.
+      באיכויות גבוהות יותר. התסדירים המיושנים מוגבלים ל־360 פיקסלים לכל היותר אך משתמשים
+      בפחות רוחב פס. תסדירי שמע הם הזרמות של שמע בלבד.
     Scroll Playback Rate Over Video Player: כאשר הסמן מעל הסרטון, יש ללחוץ ולהחזיק
       את מקש ה־Control (או Command ב־Mac) ולגלול עם גלגלת העכבר קדימה או אחורה כדי
       לשלוט בקצב הנגינה. לחיצה והחזקה של מקש Control (או Command ב־Mac) ולחיצה על

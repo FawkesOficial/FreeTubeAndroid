@@ -214,7 +214,7 @@
           v-if="!hideChannelCommunity && currentTab === 'community' && latestCommunityPosts.length === 0"
         >
           <p class="message">
-            {{ $t("Channel.Community.This channel currently does not have any posts") }}
+            {{ $t("Channel.Posts.This channel currently does not have any posts") }}
           </p>
         </FtFlexBox>
         <FtElementList
@@ -279,7 +279,7 @@ import FtAutoLoadNextPageWrapper from '../../components/ft-auto-load-next-page-w
 import FtCard from '../../components/ft-card/ft-card.vue'
 import FtElementList from '../../components/FtElementList/FtElementList.vue'
 import FtFlexBox from '../../components/ft-flex-box/ft-flex-box.vue'
-import FtLoader from '../../components/ft-loader/ft-loader.vue'
+import FtLoader from '../../components/FtLoader/FtLoader.vue'
 import FtSelect from '../../components/ft-select/ft-select.vue'
 
 import store from '../../store/index'

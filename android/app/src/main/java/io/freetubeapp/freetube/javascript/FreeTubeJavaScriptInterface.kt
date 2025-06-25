@@ -7,6 +7,7 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Intent
+import android.content.Intent.EXTRA_KEY_EVENT
 import android.graphics.BitmapFactory
 import android.media.MediaMetadata
 import android.media.session.MediaSession
@@ -15,6 +16,11 @@ import android.media.session.PlaybackState.STATE_PAUSED
 import android.net.Uri
 import android.os.Build
 import android.provider.OpenableColumns
+import android.view.KeyEvent
+import android.view.KeyEvent.KEYCODE_MEDIA_NEXT
+import android.view.KeyEvent.KEYCODE_MEDIA_PAUSE
+import android.view.KeyEvent.KEYCODE_MEDIA_PLAY
+import android.view.KeyEvent.KEYCODE_MEDIA_PREVIOUS
 import android.view.WindowManager
 import android.webkit.JavascriptInterface
 import androidx.annotation.RequiresApi
@@ -267,7 +273,32 @@ class FreeTubeJavaScriptInterface(main: MainActivity) {
       session = MediaSession(context, CHANNEL_ID)
       session.isActive = true
       mediaSession = session
+
       session.setCallback(object : MediaSession.Callback() {
+        @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+        override fun onMediaButtonEvent(mediaButtonIntent: Intent): Boolean {
+          val keyEvent = mediaButtonIntent.extras!!.getParcelable(EXTRA_KEY_EVENT, KeyEvent::class.java)
+          return if (keyEvent == null) {
+            super.onMediaButtonEvent(mediaButtonIntent)
+          } else {
+            when (keyEvent.keyCode) {
+              KEYCODE_MEDIA_PLAY -> {
+                context.webView.dispatchEvent("media-play")
+              }
+              KEYCODE_MEDIA_PAUSE -> {
+                context.webView.dispatchEvent("media-pause")
+              }
+              KEYCODE_MEDIA_NEXT -> {
+                context.webView.dispatchEvent("media-next")
+              }
+              KEYCODE_MEDIA_PREVIOUS -> {
+                context.webView.dispatchEvent("media-previous")
+              }
+            }
+            false
+          }
+        }
+
         override fun onSkipToNext() {
           super.onSkipToNext()
           context.webView.dispatchEvent("media-next")

@@ -1,6 +1,6 @@
 import i18n, { loadLocale } from '../../i18n/index'
 import allLocales from '../../../../static/locales/activeLocales.json'
-import { MAIN_PROFILE_ID, IpcChannels, SyncEvents } from '../../../constants'
+import { MAIN_PROFILE_ID, SyncEvents } from '../../../constants'
 import { DBSettingHandlers } from '../../../datastores/handlers/index'
 import { getSystemLocale, showToast } from '../../helpers/utils'
 import android from 'android'
@@ -404,8 +404,21 @@ const sideEffectHandlers = {
 
   uiScale: (_, value) => {
     if (process.env.IS_ELECTRON) {
-      const { webFrame } = require('electron')
-      webFrame.setZoomFactor(value / 100)
+      window.ftElectron.setZoomFactor(value / 100)
+    }
+  },
+
+  maxVideoPlaybackRate: ({ dispatch, state }, value) => {
+    if (state.defaultPlayback > value) {
+      dispatch('updateDefaultPlayback', value)
+    }
+  },
+
+  videoPlaybackRateInterval: ({ dispatch, state }, value) => {
+    const correctedDefaultPlaybackRate = value * Math.round(state.defaultPlayback / value)
+
+    if (state.defaultPlayback !== correctedDefaultPlaybackRate) {
+      dispatch('updateDefaultPlayback', correctedDefaultPlaybackRate)
     }
   },
 
@@ -471,9 +484,7 @@ const customActions = {
   // Should be a root action, but we'll tolerate
   setupListenersToSyncWindows: ({ commit, dispatch }) => {
     if (process.env.IS_ELECTRON) {
-      const { ipcRenderer } = require('electron')
-
-      ipcRenderer.on(IpcChannels.SYNC_SETTINGS, (_, { event, data }) => {
+      window.ftElectron.handleSyncSettings((event, data) => {
         switch (event) {
           case SyncEvents.GENERAL.UPSERT:
             if (settingsWithSideEffects.includes(data._id)) {
@@ -488,7 +499,7 @@ const customActions = {
         }
       })
 
-      ipcRenderer.on(IpcChannels.SYNC_HISTORY, (_, { event, data }) => {
+      window.ftElectron.handleSyncHistory((event, data) => {
         switch (event) {
           case SyncEvents.GENERAL.UPSERT:
             commit('upsertToHistoryCache', data)
@@ -528,7 +539,7 @@ const customActions = {
         }
       })
 
-      ipcRenderer.on(IpcChannels.SYNC_SEARCH_HISTORY, (_, { event, data }) => {
+      window.ftElectron.handleSyncSearchHistory((event, data) => {
         switch (event) {
           case SyncEvents.GENERAL.UPSERT:
             commit('upsertSearchHistoryEntryToList', data)
@@ -547,7 +558,7 @@ const customActions = {
         }
       })
 
-      ipcRenderer.on(IpcChannels.SYNC_PROFILES, (_, { event, data }) => {
+      window.ftElectron.handleSyncProfiles((event, data) => {
         switch (event) {
           case SyncEvents.GENERAL.CREATE:
             commit('addProfileToList', data)
@@ -574,7 +585,7 @@ const customActions = {
         }
       })
 
-      ipcRenderer.on(IpcChannels.SYNC_PLAYLISTS, (_, { event, data }) => {
+      window.ftElectron.handleSyncPlaylists((event, data) => {
         switch (event) {
           case SyncEvents.GENERAL.CREATE:
             commit('addPlaylists', data)
@@ -609,7 +620,7 @@ const customActions = {
         }
       })
 
-      ipcRenderer.on(IpcChannels.SYNC_SUBSCRIPTION_CACHE, (_, { event, data }) => {
+      window.ftElectron.handleSyncSubscriptionCache((event, data) => {
         switch (event) {
           case SyncEvents.SUBSCRIPTION_CACHE.UPDATE_VIDEOS_BY_CHANNEL:
             commit('updateVideoCacheByChannel', data)

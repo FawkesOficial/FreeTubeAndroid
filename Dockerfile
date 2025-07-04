@@ -22,5 +22,9 @@ COPY --from=dep /app/node_module[s] ./node_modules
 RUN if [ ! -d 'dist/web' ]; then yarn pack:web; fi
 
 ## App Stage ##
-FROM nginx:latest as app
-COPY --from=build /app/dist/web /usr/share/nginx/html
+FROM node:22-alpine as app
+WORKDIR /app
+COPY --from=build /app/dist/web ./dist/web
+COPY web-server ./web-server
+RUN cd web-server && yarn install
+CMD ["node", "web-server/server.js"]
